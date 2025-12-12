@@ -9,6 +9,7 @@
 // ===================================
 class TradingSystem {
     constructor() {
+        this.isReadOnly = false;
         this.settings = this.loadSettings();
         this.trades = this.loadTrades();
         this.currentPage = 1;
@@ -33,11 +34,17 @@ class TradingSystem {
     // Load Settings from LocalStorage
     loadSettings() {
         const saved = localStorage.getItem('runnerSettings');
-        return saved ? JSON.parse(saved) : this.getDefaultSettings();
+        const settings = saved ? JSON.parse(saved) : this.getDefaultSettings();
+        // Ensure new fields exist
+        if (!settings.targetBaseCapital) {
+            settings.targetBaseCapital = settings.initialCapital;
+        }
+        return settings;
     }
 
     // Save Settings to LocalStorage
     saveSettings() {
+        if (this.isReadOnly) return;
         localStorage.setItem('runnerSettings', JSON.stringify(this.settings));
     }
 
@@ -49,16 +56,77 @@ class TradingSystem {
 
     // Save Trades to LocalStorage
     saveTrades() {
+        if (this.isReadOnly) return;
         localStorage.setItem('runnerTrades', JSON.stringify(this.trades));
     }
 
     // Initialize System
+    // Initialize System
     init() {
+        this.checkSharedUrl();
         this.initTheme();
         this.setupEventListeners();
         this.initChart();
         this.updateDashboard();
         this.renderTradeHistory();
+    }
+
+    // Check for Shared URL Data
+    checkSharedUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedData = urlParams.get('data');
+
+        if (sharedData) {
+            try {
+                // Decode Base64 (handle UTF-8)
+                const jsonString = decodeURIComponent(escape(atob(sharedData)));
+                const data = JSON.parse(jsonString);
+
+                if (data.trades && data.settings) {
+                    this.trades = data.trades;
+                    this.settings = data.settings;
+                    this.isReadOnly = true;
+                    // Force challenge mode for viewing
+                    this.settings.accountMode = 'challenge';
+
+                    console.log('Shared profile loaded:', this.trades.length, 'trades');
+
+                    // UI Adjustments
+                    // We need to wait for DOM to be ready if called in constructor, 
+                    // but init() is called in constructor. 
+                    // Usually DOMContentLoaded calls app init, but here app is new TradingSystem() at end of body.
+                    // So DOM is ready.
+
+                    const banner = document.getElementById('readOnlyBanner');
+                    if (banner) banner.style.display = 'block';
+
+                    // Hide controls
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        .entry-section, .header-actions, #clearHistoryBtn, .delete-trade-btn, #openCalcBtn { display: none !important; }
+                    `;
+                    document.head.appendChild(style);
+                }
+            } catch (e) {
+                console.error('Error loading shared data:', e);
+                // alert('Paylaşılan veri okunamadı!');
+            }
+        }
+    }
+
+    // Generate Share Link
+    generateShareLink() {
+        const data = {
+            settings: this.settings,
+            trades: this.trades
+        };
+        const jsonString = JSON.stringify(data);
+        // Encode Base64 (handle UTF-8)
+        const encoded = btoa(unescape(encodeURIComponent(jsonString)));
+
+        // Use href split to support both file:// and https:// (GitHub Pages) correctly
+        const baseUrl = window.location.href.split('?')[0];
+        return `${baseUrl}?data=${encoded}`;
     }
 
     // ===================================
@@ -177,7 +245,15 @@ class TradingSystem {
 
     // Calculate Target Profit (TL)
     getTargetProfit() {
-        return (this.settings.initialCapital * this.settings.targetGrowth) / 100;
+        const base = this.settings.targetBaseCapital || this.settings.initialCapital;
+        return base * (this.settings.targetGrowth / 100);
+    }
+
+    // Calculate Remaining amount to reach target
+    getRemainingProfit() {
+        const target = this.getTargetProfit();
+        const currentNet = this.getNetProfit();
+        return Math.max(0, target - currentNet);
     }
 
     // Calculate Trade Profit/Loss with Flexible Parameters
@@ -276,7 +352,13 @@ class TradingSystem {
 
     // Calculate Net Profit
     getNetProfit() {
-        return this.trades.reduce((sum, trade) => sum + trade.profitLoss, 0);
+        const tradeProfit = this.trades.reduce((sum, trade) => sum + trade.profitLoss, 0);
+
+        // Add difference between Start Balance (Initial) and Base Capital (Original Start)
+        // If I start at 50,200 but Base is 50,000, I am already +200 profit relative to base.
+        const capitalDiff = this.settings.initialCapital - (this.settings.targetBaseCapital || this.settings.initialCapital);
+
+        return tradeProfit + capitalDiff;
     }
 
     // Calculate Win Rate
@@ -640,11 +722,45 @@ class TradingSystem {
             targetBadge.style.background = 'rgba(16, 185, 129, 0.15)';
             targetBadge.style.borderColor = 'var(--accent-success)';
             targetBadge.style.color = 'var(--accent-success)';
+
+            // Show Share Button if not read only
+            if (!this.isReadOnly) {
+                let shareBtn = document.getElementById('shareChallengeBtn');
+                if (!shareBtn) {
+                    shareBtn = document.createElement('button');
+                    shareBtn.id = 'shareChallengeBtn';
+                    shareBtn.className = 'btn-primary';
+                    shareBtn.style.marginTop = '1rem';
+                    shareBtn.style.width = '100%';
+                    shareBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                    shareBtn.innerHTML = '🏆 Hesabı Tamamla ve Paylaş';
+
+                    // Insert after progress container
+                    const progressContainer = document.querySelector('.progress-container');
+                    if (progressContainer && !progressContainer.nextElementSibling?.id === 'shareChallengeBtn') {
+                        progressContainer.parentNode.insertBefore(shareBtn, progressContainer.nextSibling);
+                    } else if (progressContainer) {
+                        // Check if already exists to avoid dupes
+                        if (!document.getElementById('shareChallengeBtn')) {
+                            progressContainer.insertAdjacentElement('afterend', shareBtn);
+                        }
+                    }
+
+                    // Add listener immediately or in setupEventListeners (but element is dynamic)
+                    // Better to add inline onclick or attach here
+                    shareBtn.onclick = () => {
+                        this.openShareModal('win');
+                    };
+                }
+            }
         } else {
             targetBadge.textContent = 'Aktif';
             targetBadge.style.background = 'rgba(16, 185, 129, 0.15)';
             targetBadge.style.borderColor = 'var(--accent-success)';
             targetBadge.style.color = 'var(--accent-success)';
+            // Remove share button if exists (in case user deletes a win trade)
+            const shareBtn = document.getElementById('shareChallengeBtn');
+            if (shareBtn) shareBtn.remove();
         }
 
         // Metrics
@@ -994,7 +1110,115 @@ class TradingSystem {
         document.getElementById('nextPageBtn').addEventListener('click', () => {
             this.changePage(1);
         });
+
+        // App Share Button (Header)
+        const headerShareBtn = document.getElementById('shareBtn');
+        if (headerShareBtn) {
+            headerShareBtn.addEventListener('click', () => {
+                this.openShareModal('share');
+            });
+        }
+
+        // Share Modal Listeners
+        const shareModalClose = document.getElementById('shareModalClose');
+        if (shareModalClose) {
+            shareModalClose.addEventListener('click', () => {
+                document.getElementById('shareModal').classList.remove('active');
+            });
+        }
+
+        const shareModalOverlay = document.getElementById('shareModalOverlay');
+        if (shareModalOverlay) {
+            shareModalOverlay.addEventListener('click', () => {
+                document.getElementById('shareModal').classList.remove('active');
+            });
+        }
+
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        if (copyLinkBtn) {
+            copyLinkBtn.addEventListener('click', () => {
+                const input = document.getElementById('shareLinkInput');
+                input.select();
+                document.execCommand('copy'); // Fallback
+
+                // Modern API
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(input.value);
+                }
+
+                const originalText = copyLinkBtn.textContent;
+                copyLinkBtn.textContent = 'Kopyalandı!';
+                setTimeout(() => {
+                    copyLinkBtn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        const startNewChallengeBtn = document.getElementById('startNewChallengeBtn');
+        if (startNewChallengeBtn) {
+            startNewChallengeBtn.addEventListener('click', () => {
+                this.startNewChallenge();
+            });
+        }
     }
+
+    openShareModal(mode = 'share') {
+        const link = this.generateShareLink();
+        document.getElementById('shareLinkInput').value = link;
+
+        // Custom UI based on mode
+        const titleEl = document.getElementById('shareModalTitle');
+        const iconEl = document.getElementById('shareModalIcon');
+        const headingEl = document.getElementById('shareModalHeading');
+        const msgEl = document.getElementById('shareModalMessage');
+        const newChallengeSection = document.getElementById('newChallengeSection');
+
+        if (mode === 'win') {
+            titleEl.textContent = '🏆 Challenge Tamamlandı!';
+            iconEl.textContent = '🎉';
+            headingEl.textContent = 'Tebrikler! Hedefinize Ulaştınız.';
+            msgEl.textContent = 'Başarınızı arkadaşlarınızla paylaşmak için aşağıdaki linki kullanabilirsiniz.';
+            if (newChallengeSection) newChallengeSection.style.display = 'block';
+        } else {
+            titleEl.textContent = '📈 Profil Paylaşımı';
+            iconEl.textContent = '🔗';
+            headingEl.textContent = 'İstatistiklerini Paylaş';
+            msgEl.textContent = 'Mevcut performansını ve işlem geçmişini görüntülemek için bu bağlantıyı paylaşabilirsin.';
+            if (newChallengeSection) newChallengeSection.style.display = 'none';
+        }
+
+        document.getElementById('shareModal').classList.add('active');
+    }
+
+    startNewChallenge() {
+        if (confirm('Yeni challenge başlatılacak. Mevcut bakiye başlangıç olarak ayarlanıp işlem geçmişi temizlenecek. Onaylıyor musunuz?')) {
+            // Get current balance before clearing
+            const newCapital = this.getCurrentBalance();
+
+            // Update settings
+            this.settings.initialCapital = newCapital;
+            // Also reset base capital to new capital for fresh start 
+            // (User can manually change base capital in settings if they want "carry over" logic)
+            this.settings.targetBaseCapital = newCapital;
+            this.saveSettings();
+
+            // Clear trades
+            this.trades = [];
+            this.saveTrades();
+
+            // Update UI
+            document.getElementById('shareModal').classList.remove('active');
+            this.updateDashboard();
+            this.renderTradeHistory();
+
+            // Update form input visual
+            document.getElementById('initialCapital').value = newCapital;
+
+            this.showNotification('Yeni challenge başlatıldı! Bol kazançlar 🚀', 'success');
+        }
+    }
+
+
 
     // Calculator Logic
     calculateProfit() {
@@ -1367,8 +1591,18 @@ class TradingSystem {
             if (r.checked) accountMode = r.value;
         });
 
+        // Parse new settings
+        const initialCapital = parseFloat(document.getElementById('initialCapital').value);
+        let targetBaseCapital = parseFloat(document.getElementById('targetBaseCapital').value);
+
+        // If target base is invalid or 0, fallback to initial capital
+        if (!targetBaseCapital || isNaN(targetBaseCapital)) {
+            targetBaseCapital = initialCapital;
+        }
+
         const newSettings = {
-            initialCapital: parseFloat(document.getElementById('initialCapital').value),
+            initialCapital: initialCapital,
+            targetBaseCapital: targetBaseCapital,
             targetGrowth: parseFloat(document.getElementById('targetGrowth').value),
             riskPerTrade: parseFloat(document.getElementById('riskPerTrade').value),
             rLevel: parseFloat(document.getElementById('rLevel').value),
@@ -1377,9 +1611,9 @@ class TradingSystem {
             accountMode: accountMode
         };
 
-        // Validation
-        if (newSettings.initialCapital < 1000) {
-            alert('Başlangıç sermayesi en az 1,000 TL olmalıdır');
+        // Validation (Allow 0 or more)
+        if (newSettings.initialCapital < 0) {
+            alert('Başlangıç sermayesi negatif olamaz');
             return;
         }
 
@@ -1409,7 +1643,7 @@ class TradingSystem {
         this.saveSettings();
         this.updateDashboard();
         this.closeSettingsModal();
-        alert('✅ Ayarlar başarıyla kaydedildi');
+        this.showNotification('Ayarlar kaydedildi', 'success');
     }
 
     resetSettings() {
@@ -1419,6 +1653,7 @@ class TradingSystem {
 
             // Refresh form values
             document.getElementById('initialCapital').value = this.settings.initialCapital;
+            document.getElementById('targetBaseCapital').value = this.settings.targetBaseCapital || this.settings.initialCapital;
             document.getElementById('targetGrowth').value = this.settings.targetGrowth;
             document.getElementById('riskPerTrade').value = this.settings.riskPerTrade;
             document.getElementById('rLevel').value = this.settings.rLevel;

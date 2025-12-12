@@ -28,12 +28,21 @@
                         <p>Performance Analytics</p>
                     </div>
                 </div>
-                <div class="header-actions">
+                <div class="header-actions" id="headerActions">
                     <button class="theme-btn" id="themeBtn" title="Temayı Değiştir">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                         </svg>
+                    </button>
+                    <button class="settings-btn" id="shareBtn" style="margin-right: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                            <polyline points="16 6 12 2 8 6"></polyline>
+                            <line x1="12" y1="2" x2="12" y2="15"></line>
+                        </svg>
+                        Paylaş
                     </button>
                     <button class="settings-btn" id="settingsBtn">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -49,6 +58,15 @@
             </div>
         </div>
     </header>
+
+    <!-- Read Only Banner -->
+    <div id="readOnlyBanner"
+        style="display: none; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; text-align: center; padding: 12px; font-weight: 500; font-size: 0.95rem;">
+        👁️ Bu paylaşılan bir profildir. Sadece görüntüleme modundasınız.
+        <a href="index.html"
+            style="color: white; text-decoration: underline; margin-left: 10px; font-weight: 700;">Kendi Takibini
+            Başlat</a>
+    </div>
 
     <!-- Main Container -->
     <main class="main-container">
@@ -378,8 +396,14 @@
 
                     <div class="form-group">
                         <label for="initialCapital">Başlangıç Sermayesi (₺)</label>
-                        <input type="number" id="initialCapital" value="50000" min="1000" step="1000" required>
-                        <small>Hesabınızın başlangıç bakiyesi</small>
+                        <input type="number" id="initialCapital" value="50000" min="0" step="0.01" required>
+                        <small>Hesabınızın şu anki mevcut bakiyesi</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="targetBaseCapital">Hedef Baz Sermayesi (₺)</label>
+                        <input type="number" id="targetBaseCapital" value="50000" min="0" step="0.01" required>
+                        <small>Hedefin hesaplandığı ana para (Değişmez)</small>
                     </div>
 
                     <div class="form-group" id="targetGrowthGroup">
@@ -480,6 +504,54 @@
 
                 <div class="form-actions">
                     <button type="button" class="btn-primary" id="calculateBtn" style="width: 100%">Hesapla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="modal" id="shareModal">
+        <div class="modal-overlay" id="shareModalOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="shareModalTitle">🏆 Challenge Tamamlandı!</h3>
+                <button class="modal-close" id="shareModalClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body" style="text-align: center; padding-top: 1rem;">
+                <div id="shareModalIcon" style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
+                <h4 id="shareModalHeading" style="margin-bottom: 0.5rem; color: var(--text-primary);">Tebrikler!
+                    Hedefinize Ulaştınız.</h4>
+                <p id="shareModalMessage" style="color: var(--text-secondary); margin-bottom: 1.5rem;">Başarınızı
+                    arkadaşlarınızla paylaşmak
+                    için aşağıdaki linki kullanabilirsiniz.</p>
+
+                <div class="form-group">
+                    <label>Paylaşılabilir Link</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="shareLinkInput" readonly
+                            style="text-align: center; font-family: monospace; font-size: 0.9rem;">
+                        <button type="button" class="btn-primary" id="copyLinkBtn"
+                            style="min-width: 80px;">Kopyala</button>
+                    </div>
+                </div>
+
+                <div id="newChallengeSection"
+                    style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); display: none;">
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Bu challenge tamamlandı! Mevcut bakiyenle yeni bir hedefe yelken açmak ister misin?
+                    </p>
+                    <button type="button" class="submit-btn" id="startNewChallengeBtn"
+                        style="background-color: var(--accent-primary);">
+                        🚀 Yeni Challenge Başlat (Bakiyeyi Devret)
+                    </button>
+                    <small style="display: block; margin-top: 8px; color: var(--text-secondary);">
+                        *Mevcut bakiye başlangıç sermayesi yapılır, işlemler temizlenir ve yeni hedef belirlenir.
+                    </small>
                 </div>
             </div>
         </div>
