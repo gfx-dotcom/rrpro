@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runner R-Performance Tracker | Profesyonel Trading Takip Sistemi</title>
+    <meta name="description"
+        content="Runner stratejisi ile trading performansınızı takip edin. Risk/Ödül oranı, hesap büyüme hedefi ve akıllı geri bildirimlerle profesyonel trading yönetimi.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">R</div>
+                    <div class="logo-text">
+                        <h1>Runner Tracker</h1>
+                        <p>Performance Analytics</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="theme-btn" id="themeBtn" title="Temayı Değiştir">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                    <button class="settings-btn" id="settingsBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M12 1v6m0 6v6m0-18a9 9 0 0 1 9 9m-9-9a9 9 0 0 0-9 9m9 9a9 9 0 0 1-9-9m9 9a9 9 0 0 0 9-9">
+                            </path>
+                        </svg>
+                        Ayarlar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="container">
+
+            <!-- Target Status Section -->
+            <section class="target-section">
+                <div class="section-header">
+                    <h2>🎯 HEDEF DURUMU</h2>
+                    <div class="target-badge" id="targetBadge">Aktif</div>
+                </div>
+
+                <div class="target-grid">
+                    <div class="target-card primary">
+                        <div class="card-label">Hedeflenen Kâr</div>
+                        <div class="card-value" id="targetProfit">4,000 ₺</div>
+                        <div class="card-sublabel">%8 Büyüme Hedefi</div>
+                    </div>
+
+                    <div class="target-card success">
+                        <div class="card-label">Güncel Net Kâr</div>
+                        <div class="card-value" id="currentProfit">0 ₺</div>
+                        <div class="card-sublabel" id="profitChange">Başlangıç</div>
+                    </div>
+
+                    <div class="target-card warning">
+                        <div class="card-label">Hedefe Kalan</div>
+                        <div class="card-value" id="remainingProfit">4,000 ₺</div>
+                        <div class="card-sublabel" id="remainingTrades">~0 işlem gerekli</div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span>Tamamlanma Oranı</span>
+                        <span class="progress-percentage" id="progressPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        <div class="progress-glow" id="progressGlow" style="width: 0%"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chart Section -->
+            <section class="chart-section">
+                <div class="section-header">
+                    <h2>📊 BAKİYE İLERLEYİŞİ</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="balanceChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Performance Metrics -->
+            <section class="metrics-section">
+                <div class="section-header">
+                    <h2>📈 PERFORMANS ANALİZİ</h2>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon balance">💰</div>
+                        <div class="metric-content">
+                            <div class="metric-label">Güncel Bakiye</div>
+                            <div class="metric-value" id="currentBalance">50,000 ₺</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon winrate">🎯</div>
+                        <div class="metric-content">
+                            <div class="metric-label">Kazanma Oranı</div>
+                            <div class="metric-value" id="winRate">0%</div>
+                            <div class="metric-detail" id="winRateDetail">0/0 işlem</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon rrr">📊</div>
+                        <div class="metric-content">
+                            <div class="metric-label">Ortalama Runner RRR</div>
+                            <div class="metric-value" id="avgRRR">0.00R</div>
+                            <div class="metric-detail" id="rrrDetail">Kazanan işlemler</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon profit">💵</div>
+                        <div class="metric-content">
+                            <div class="metric-label">Net Kar/Kayıp</div>
+                            <div class="metric-value" id="netProfitLoss">0 ₺</div>
+                            <div class="metric-detail" id="profitDetail">Toplam işlem sonucu</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon drawdown">📉</div>
+                        <div class="metric-content">
+                            <div class="metric-label">Max Drawdown</div>
+                            <div class="metric-value" id="maxDrawdown">0%</div>
+                            <div class="metric-detail" id="drawdownDetail">Zirveden düşüş</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Smart Feedback -->
+            <section class="feedback-section" id="feedbackSection" style="display: none;">
+                <div class="feedback-card" id="feedbackCard">
+                    <div class="feedback-icon" id="feedbackIcon">💡</div>
+                    <div class="feedback-content">
+                        <div class="feedback-title" id="feedbackTitle">Akıllı Geri Bildirim</div>
+                        <div class="feedback-message" id="feedbackMessage"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Trade Entry Form -->
+            <section class="entry-section">
+                <div class="section-header">
+                    <h2>➕ YENİ İŞLEM KAYDI</h2>
+                    <button class="calculator-btn" id="openCalcBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                            <line x1="8" y1="6" x2="16" y2="6"></line>
+                            <line x1="16" y1="14" x2="16" y2="14"></line>
+                            <line x1="8" y1="14" x2="8" y2="14"></line>
+                            <line x1="12" y1="14" x2="12" y2="14"></line>
+                            <line x1="8" y1="18" x2="8" y2="18"></line>
+                            <line x1="12" y1="18" x2="12" y2="18"></line>
+                            <line x1="16" y1="18" x2="16" y2="18"></line>
+                        </svg>
+                        Hesap Makinesi
+                    </button>
+                </div>
+
+                <form class="trade-form" id="tradeForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="tradeResult">İşlem Sonucu</label>
+                            <select id="tradeResult" required>
+                                <option value="">Seçiniz...</option>
+                                <option value="loss">❌ Kayıp (SL)</option>
+                                <option value="be">⚖️ Başa Baş (BE)</option>
+                                <option value="win">✅ Kazanç (Win)</option>
+                            </select>
+                        </div>
+
+                        <!-- Multi TP Toggle -->
+                        <div class="form-group" id="multiTPToggleGroup" style="display: none;">
+                            <label for="multiTPToggle">Çoklu Kar Alımı?</label>
+                            <select id="multiTPToggle">
+                                <option value="no">Hayır (Standart)</option>
+                                <option value="yes">Evet (Gelişmiş)</option>
+                            </select>
+                        </div>
+
+                        <!-- Multi TP Container -->
+                        <div class="multi-tp-container" id="multiTPContainer" style="display: none;">
+                            <div class="form-header-row">
+                                <label>Kar Alım Seviyeleri</label>
+                                <button type="button" class="add-tp-btn" id="addTPRowBtn">+ Yeni Seviye Ekle</button>
+                            </div>
+                            <div id="tpRows">
+                                <!-- Dynamic Rows Will Be Added Here -->
+                            </div>
+                            <small style="margin-top: 8px; display: block;">Toplam Yüzde: <span
+                                    id="totalTPPercent">0</span>%</small>
+                        </div>
+
+                        <!-- Win Trade Details -->
+                        <div class="form-group" id="firstCloseRRRGroup" style="display: none;">
+                            <label for="firstCloseRRR">İlk Kapanış RRR Seviyesi</label>
+                            <input type="number" id="firstCloseRRR" step="0.1" min="0" placeholder="Örn: 1.2">
+                            <small>İlk kısmı hangi R seviyesinde kapattınız?</small>
+                        </div>
+
+                        <div class="form-group" id="firstClosePercentGroup" style="display: none;">
+                            <label for="firstClosePercent">İlk Kapanış Yüzdesi (%)</label>
+                            <input type="number" id="firstClosePercent" step="5" min="0" max="100"
+                                placeholder="Örn: 70">
+                            <small>Pozisyonun yüzde kaçını kapattınız?</small>
+                        </div>
+
+                        <div class="form-group" id="runnerCloseRRRGroup" style="display: none;">
+                            <label for="runnerCloseRRR">Kalan Kısmın Kapandığı RRR</label>
+                            <input type="number" id="runnerCloseRRR" step="0.1" min="0" placeholder="Örn: 3.5">
+                            <small>Runner kısmı hangi R seviyesinde kapandı?</small>
+                        </div>
+
+                        <!-- BE Trade Details -->
+                        <div class="form-group" id="beCloseRRRGroup" style="display: none;">
+                            <label for="beCloseRRR">İlk Kapanış RRR Seviyesi</label>
+                            <input type="number" id="beCloseRRR" step="0.1" min="0" placeholder="Örn: 1.2">
+                            <small>Kâr kilitleme yaptığınız R seviyesi</small>
+                        </div>
+
+                        <div class="form-group" id="beClosePercentGroup" style="display: none;">
+                            <label for="beClosePercent">İlk Kapanış Yüzdesi (%)</label>
+                            <input type="number" id="beClosePercent" step="5" min="0" max="100" placeholder="Örn: 70">
+                            <small>Kâr kilitlediğiniz pozisyon yüzdesi</small>
+                        </div>
+
+                        <div class="form-group full-width" id="notesGroup">
+                            <label for="tradeNotes">İşlem Notları (Opsiyonel)</label>
+                            <textarea id="tradeNotes" rows="2"
+                                placeholder="Kapanış dağılımı veya diğer notlar..."></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 5v14m-7-7h14"></path>
+                        </svg>
+                        İşlemi Kaydet
+                    </button>
+                </form>
+            </section>
+
+            <!-- Trade History -->
+            <section class="history-section">
+                <div class="section-header">
+                    <h2>📜 İŞLEM GEÇMİŞİ</h2>
+                    <button class="clear-btn" id="clearHistoryBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                        </svg>
+                        Geçmişi Temizle
+                    </button>
+                </div>
+
+                <div class="history-container" id="historyContainer">
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <p>Henüz işlem kaydı yok</p>
+                        <small>Yukarıdaki formdan ilk işleminizi ekleyin</small>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container" id="paginationContainer" style="display: none;">
+                    <button class="pagination-btn" id="prevPageBtn" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"></path>
+                        </svg>
+                        Önceki
+                    </button>
+                    <span class="pagination-info" id="paginationInfo">Sayfa 1 / 1</span>
+                    <button class="pagination-btn" id="nextPageBtn" disabled>
+                        Sonraki
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M9 18l6-6-6-6"></path>
+                        </svg>
+                    </button>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚙️ Sistem Ayarları</h3>
+                <button class="modal-close" id="modalClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form class="settings-form" id="settingsForm">
+                <div class="form-group">
+                    <label for="initialCapital">Başlangıç Sermayesi (₺)</label>
+                    <input type="number" id="initialCapital" value="50000" min="1000" step="1000" required>
+                    <small>Hesabınızın başlangıç bakiyesi</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="targetGrowth">Hedef Büyüme Oranı (%)</label>
+                    <input type="number" id="targetGrowth" value="8" min="1" max="100" step="0.5" required>
+                    <small>Ulaşmak istediğiniz kâr yüzdesi</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="riskPerTrade">İşlem Başına Maksimum Risk (%)</label>
+                    <input type="number" id="riskPerTrade" value="0.5" min="0.1" max="5" step="0.1" required>
+                    <small>Her işlemde riske atacağınız sermaye yüzdesi</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="rLevel">Kâr Kilitleme R Seviyesi (Varsayılan)</label>
+                    <input type="number" id="rLevel" value="1.2" min="0.5" max="5" step="0.1" required>
+                    <small>Önerilen kâr kilitleme R değeri (değiştirilebilir)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="lockPercentage">Kilitlenen Pozisyon Yüzdesi (Varsayılan %)</label>
+                    <input type="number" id="lockPercentage" value="70" min="50" max="90" step="5" required>
+                    <small>Önerilen kilitleme oranı (değiştirilebilir)</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="resetSettings">Varsayılana Dön</button>
+                    <button type="button" class="btn-danger" id="clearAllData">Tüm Verileri Sıfırla</button>
+                    <button type="submit" class="btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Calculator Modal -->
+    <div class="modal" id="calcModal">
+        <div class="modal-overlay" id="calcModalOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🧮 Kâr Hesaplayıcı</h3>
+                <button class="modal-close" id="calcModalClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="settings-form">
+                <div class="form-group">
+                    <label for="calcRiskAmount">Risk Miktarı (TL)</label>
+                    <input type="number" id="calcRiskAmount" placeholder="Örn: 250">
+                    <small>İşlem başına riske edilen tutar</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="calcRRR">Hedef RRR</label>
+                    <input type="number" id="calcRRR" placeholder="Örn: 2.5" step="0.1">
+                    <small>Kâr almayı planladığınız R seviyesi</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="calcPercent">Kapanış Yüzdesi (%)</label>
+                    <input type="number" id="calcPercent" placeholder="Örn: 90" max="100">
+                    <small>Bu seviyede kapatılacak pozisyon oranı</small>
+                </div>
+
+                <div class="calc-result-box">
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px;">Tahmini Kâr</div>
+                    <div class="calc-result-value" id="calcResult">0 ₺</div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-primary" id="calculateBtn" style="width: 100%">Hesapla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
