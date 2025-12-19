@@ -171,6 +171,13 @@ section {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    /* For ::before border */
+    overflow: visible;
+    /* changed from hidden, or keep hidden if used for border radius masking */
 }
 
 .target-card.primary {
@@ -382,6 +389,13 @@ section {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
+    width: 100%;
+    /* Ensure full width */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 2px;
 }
 
 .form-group.full-width {
@@ -602,8 +616,111 @@ small {
     color: var(--accent-success);
 }
 
-font-size: 0.75rem;
-font-weight: 600;
+.strategy-badge {
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Profile Switcher */
+.profile-switcher {
+    position: relative;
+    margin-right: 8px;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 220px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    padding: 8px;
+    display: none;
+    animation: slideDown 0.2s ease;
+}
+
+.profile-dropdown.active {
+    display: block;
+}
+
+.profile-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 8px;
+}
+
+.profile-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.profile-item:hover {
+    background: var(--bg-hover);
+}
+
+.profile-item.active {
+    background: rgba(88, 166, 255, 0.15);
+    border-left: 3px solid var(--accent-info);
+}
+
+.profile-item-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.delete-profile-btn {
+    opacity: 0;
+    padding: 4px;
+    border-radius: 4px;
+    color: var(--accent-danger);
+    transition: 0.2s;
+}
+
+.profile-item:hover .delete-profile-btn {
+    opacity: 1;
+}
+
+.add-profile-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--bg-hover);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--accent-info);
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.add-profile-btn:hover {
+    background: rgba(88, 166, 255, 0.1);
+    border-color: var(--accent-info);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .strategy-badge.compliant {
@@ -614,6 +731,29 @@ font-weight: 600;
 .strategy-badge.deviated {
     background-color: rgba(210, 153, 34, 0.1);
     color: var(--accent-warning);
+}
+
+.chart-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background-color: rgba(88, 166, 255, 0.12);
+    color: var(--accent-primary);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    border: 1px solid rgba(88, 166, 255, 0.2);
+    cursor: pointer;
+}
+
+.chart-btn:hover {
+    background-color: var(--accent-primary);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(88, 166, 255, 0.4);
+    border-color: transparent;
 }
 
 .trade-details {
@@ -790,18 +930,142 @@ font-weight: 600;
     color: var(--text-primary);
 }
 
+/* Unified Modal Form & Settings Styling */
+.modal-body form,
 .settings-form {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: 1.5rem;
+}
+
+.modal-body form .form-group,
+.settings-form .form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    width: 100% !important;
+    margin-bottom: 0px;
+    /* Gap handled by form */
+}
+
+/* Force all inputs/selects in modals to 100% width */
+.modal-body form .form-group input:not([type="checkbox"]):not([type="radio"]),
+.modal-body form .form-group select,
+.settings-form .form-group input:not([type="checkbox"]):not([type="radio"]),
+.settings-form .form-group select {
+    width: 100% !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    background-color: #0d1117;
+    border: 1px solid #30363d;
+    padding: 12px;
+    border-radius: 6px;
+    color: #e6edf3;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-body form .form-group label,
+.settings-form .form-group label {
+    font-weight: 700 !important;
+    color: #e6edf3 !important;
+    font-size: 0.85rem !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px !important;
+}
+
+/* Modern Descriptions (Small Tags) */
+.modal-body form .form-group small,
+.settings-form .form-group small {
+    display: block;
+    width: 100% !important;
+    margin-top: 4px !important;
+    padding: 8px 12px !important;
+    background: rgba(139, 148, 158, 0.1) !important;
+    border-radius: 4px !important;
+    color: #8b949e !important;
+    font-size: 0.75rem !important;
+    line-height: 1.4 !important;
+    border-left: 3px solid #30363d !important;
+    box-sizing: border-box !important;
+}
+
+#modeDescription {
+    border-left-color: var(--accent-primary) !important;
+    background: rgba(88, 166, 255, 0.05) !important;
+}
+
+/* Settings Sectioning Classes */
+.settings-section {
+    background: rgba(48, 54, 61, 0.2);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.settings-section-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .form-actions {
     display: flex;
     justify-content: flex-end;
     gap: var(--spacing-md);
-    margin-top: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
 }
+
+/* Checkbox & Radio Alignment */
+.radio-group {
+    display: flex;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.radio-label,
+.checkbox-label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+}
+
+.radio-label input[type="radio"],
+.checkbox-label input[type="checkbox"] {
+    accent-color: #d23669;
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0;
+}
+
+/* Ensure 'Hesap Modu' and other top labels are white */
+.settings-form .form-group label:not(.radio-label):not(.checkbox-label) {
+    color: #e6edf3 !important;
+    /* Bright white */
+    font-size: 0.9rem;
+}
+
+/* Manual Mode Checkbox Specific */
+#manualMode {
+    accent-color: #d23669;
+}
+
+
 
 .btn-primary,
 .btn-secondary,
@@ -1057,7 +1321,9 @@ font-weight: 600;
     textarea {
         font-size: 16px;
     }
-}/* Renkli Target Card Borders */
+}
+
+/* Renkli Target Card Borders */
 .target-card::before {
     content: '';
     position: absolute;

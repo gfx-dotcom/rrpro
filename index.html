@@ -14,6 +14,10 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -44,6 +48,23 @@
                         </svg>
                         Paylaş
                     </button>
+                    <div class="profile-switcher">
+                        <button class="settings-btn" id="currentProfileTitle" style="gap: 8px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span id="activeProfileName">Ana Hesap</span>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="profile-list" id="profileList">
+                                <!-- Profiller buraya gelecek -->
+                            </div>
+                            <button id="addProfileBtn" class="add-profile-btn">+ Yeni Portföy Ekle</button>
+                        </div>
+                    </div>
+
                     <button class="settings-btn" id="settingsBtn">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
@@ -225,6 +246,12 @@
                         </div>
                     </div>
 
+                    <div class="form-group full-width" style="margin-bottom: 1rem;">
+                        <label for="chartUrl">TradingView Link (Opsiyonel)</label>
+                        <input type="url" id="chartUrl" placeholder="https://www.tradingview.com/x/..."
+                            style="width: 100%;">
+                    </div>
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="tradeResult">İşlem Sonucu</label>
@@ -376,66 +403,101 @@
 
             <div class="modal-body">
                 <form id="settingsForm">
-                    <!-- Account Mode -->
-                    <div class="form-group">
-                        <label>Hesap Modu</label>
-                        <div class="radio-group" style="display: flex; gap: 1.5rem; margin-top: 0.5rem;">
-                            <label style="cursor:pointer; display: flex; align-items: center; gap: 8px;">
-                                <input type="radio" name="accountMode" value="challenge" checked
-                                    onchange="toggleTargetInput()">
-                                <span>🎯 Challenge (Hedefli)</span>
-                            </label>
-                            <label style="cursor:pointer; display: flex; align-items: center; gap: 8px;">
-                                <input type="radio" name="accountMode" value="free" onchange="toggleTargetInput()">
-                                <span>📈 Serbest (Bakiye)</span>
-                            </label>
+                    <!-- Section 1: Account Mode -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">⚖️ Hesap Modu Seçimi</div>
+                        <div class="form-group">
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="accountMode" value="challenge" checked
+                                        onchange="toggleTargetInput()">
+                                    <span>🎯 Challenge (Hedefli)</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="accountMode" value="free" onchange="toggleTargetInput()">
+                                    <span>📈 Serbest (Bakiye)</span>
+                                </label>
+                            </div>
+                            <small id="modeDescription">Challenge modunda belirli bir kâr hedefine ulaşmaya
+                                çalışırsınız.</small>
                         </div>
-                        <small style="margin-top: 5px; display: block;">Serbest modda hedef sorulmaz, büyüme
-                            sınırsızdır.</small>
                     </div>
 
-                    <div class="form-group">
-                        <label for="initialCapital">Başlangıç Sermayesi (₺)</label>
-                        <input type="number" id="initialCapital" value="50000" min="0" step="0.01" required>
-                        <small>Hesabınızın şu anki mevcut bakiyesi</small>
+                    <!-- Section 2: Capital & Target -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">💰 Sermaye ve Hedef Ayarları</div>
+                        <div class="form-group">
+                            <label for="archiveName">Günlük / Arşiv İsmi</label>
+                            <input type="text" id="archiveName" value="RUNNER TRADER JOURNAL" maxlength="50" required>
+                            <small>Rapor başlıklarında ve dosya isminde kullanılacak isim.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="initialCapital">Başlangıç Sermayesi (₺)</label>
+                            <input type="number" id="initialCapital" value="50000" min="0" step="0.01" required>
+                            <small>Hesabınızın şu anki mevcut bakiyesi</small>
+                        </div>
+
+                        <div class="form-group" id="targetBaseGroup">
+                            <label for="targetBaseCapital">Hedef Baz Sermayesi (₺)</label>
+                            <input type="number" id="targetBaseCapital" value="50000" min="0" step="0.01" required>
+                            <small>Hedefin hesaplandığı ana para (Kâr bu tutar üzerinden hesaplanır)</small>
+                        </div>
+
+                        <div class="form-group" id="targetGrowthGroup">
+                            <label for="targetGrowth">Hedef Büyüme Oranı (%)</label>
+                            <input type="number" id="targetGrowth" value="8" min="1" max="1000" step="0.5" required>
+                            <small>Challenge modunda ulaşmak istediğiniz toplam kâr yüzdesi</small>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="targetBaseCapital">Hedef Baz Sermayesi (₺)</label>
-                        <input type="number" id="targetBaseCapital" value="50000" min="0" step="0.01" required>
-                        <small>Hedefin hesaplandığı ana para (Değişmez)</small>
+                    <!-- Section 3: Risk Management -->
+                    <div class="settings-section" id="riskManagementSection">
+                        <div class="settings-section-title">🛡️ Risk ve Strateji Yönetimi</div>
+                        <div class="form-group" id="riskGroup">
+                            <label for="riskPerTrade">İşlem Başına Maksimum Risk (%)</label>
+                            <input type="number" id="riskPerTrade" value="0.5" min="0.1" max="5" step="0.1" required>
+                            <small>Her işlemde kasanızın yüzde kaçını riske atacaksınız?</small>
+                        </div>
+
+                        <div class="form-group" id="rGroup">
+                            <label for="rLevel">Kâr Kilitleme R Seviyesi</label>
+                            <input type="number" id="rLevel" value="1.2" min="0.5" max="5" step="0.1" required>
+                            <small>İşlem bu R seviyesine ulaştığında kârın bir kısmı kilitlenir.</small>
+                        </div>
+
+                        <div class="form-group" id="lockGroup">
+                            <label for="lockPercentage">Kilitlenen Pozisyon Yüzdesi (%)</label>
+                            <input type="number" id="lockPercentage" value="70" min="50" max="90" step="5" required>
+                            <small>Kâr kilitlendiğinde pozisyonun yüzde kaçı kapatılacak?</small>
+                        </div>
                     </div>
 
-                    <div class="form-group" id="targetGrowthGroup">
-                        <label for="targetGrowth">Hedef Büyüme Oranı (%)</label>
-                        <input type="number" id="targetGrowth" value="8" min="1" max="100" step="0.5" required>
-                        <small>Ulaşmak istediğiniz kâr yüzdesi</small>
+                    <!-- Section 4: Manual Mode -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">⚙️ Ek Özellikler</div>
+                        <div class="form-group" id="manualModeGroup">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="manualMode">
+                                <span>Manuel Giriş Modu</span>
+                            </label>
+                            <small>Kazanç miktarlarını Runner sisteminin otomatik hesaplaması yerine manuel girmek için
+                                kullanın.</small>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="riskPerTrade">İşlem Başına Maksimum Risk (%)</label>
-                        <input type="number" id="riskPerTrade" value="0.5" min="0.1" max="5" step="0.1" required>
-                        <small>Her işlemde riske atacağınız sermaye yüzdesi</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="rLevel">Kâr Kilitleme R Seviyesi (Varsayılan)</label>
-                        <input type="number" id="rLevel" value="1.2" min="0.5" max="5" step="0.1" required>
-                        <small>Önerilen kâr kilitleme R değeri (değiştirilebilir)</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="lockPercentage">Kilitlenen Pozisyon Yüzdesi (Varsayılan %)</label>
-                        <input type="number" id="lockPercentage" value="70" min="50" max="90" step="5" required>
-                        <small>Önerilen kilitleme oranı (değiştirilebilir)</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="manualMode" style="width: auto;">
-                            <span>Manuel Giriş Modu</span>
-                        </label>
-                        <small>Kazanç işlemlerinde parasal kâr tutarını manuel olarak girin</small>
+                    <!-- Section 5: Account Closure -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">📂 Hesabı Kapat ve Arşivle</div>
+                        <p
+                            style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">
+                            Mevcut challenge veya serbest dönemi sonlandırın. Tüm işlem geçmişiniz profesyonel formatta
+                            <b>PDF ve Excel</b> olarak dışa aktarılır, ardından hesabınız yeni bir dönem için
+                            sıfırlanır.
+                        </p>
+                        <button type="button" class="btn-primary" id="closeAccountBtn"
+                            style="background: linear-gradient(135deg, #f85149, #b91c1c); border: none; width: 100%; padding: 12px; font-weight: bold; border-radius: 8px;">
+                            🏆 Hesabı Kapat ve Verileri İndir
+                        </button>
                     </div>
 
                     <div class="form-actions">

@@ -10,12 +10,26 @@
 class TradingSystem {
     constructor() {
         this.isReadOnly = false;
+
+        // Multi-Profile State
+        this.activeProfileId = localStorage.getItem('activeProfileId') || 'default';
+        this.profiles = JSON.parse(localStorage.getItem('runnerProfiles')) || [
+            { id: 'default', name: 'Ana Hesap' }
+        ];
+
         this.settings = this.loadSettings();
         this.trades = this.loadTrades();
         this.currentPage = 1;
         this.itemsPerPage = 5;
         this.chart = null;
-        this.init();
+
+        // Initialize Core Systems
+        this.checkSharedUrl();
+        this.initTheme();
+        this.setupEventListeners(); // Called only once
+
+        // Initial UI Render
+        this.refreshUI();
     }
 
     // Default Settings
@@ -27,15 +41,27 @@ class TradingSystem {
             rLevel: 1.2,
             lockPercentage: 70,
             manualMode: false,
-            accountMode: 'challenge' // 'challenge' or 'free'
+            accountMode: 'challenge', // 'challenge' or 'free'
+            archiveName: 'RUNNER TRADER JOURNAL'
         };
     }
 
     // Load Settings from LocalStorage
     loadSettings() {
-        const saved = localStorage.getItem('runnerSettings');
+        const key = `runnerSettings_${this.activeProfileId}`;
+        const saved = localStorage.getItem(key);
+
+        // Fallback to old global key for default profile if new key doesn't exist
+        if (this.activeProfileId === 'default' && !saved) {
+            const legacy = localStorage.getItem('runnerSettings');
+            if (legacy) {
+                const settings = JSON.parse(legacy);
+                if (!settings.targetBaseCapital) settings.targetBaseCapital = settings.initialCapital;
+                return settings;
+            }
+        }
+
         const settings = saved ? JSON.parse(saved) : this.getDefaultSettings();
-        // Ensure new fields exist
         if (!settings.targetBaseCapital) {
             settings.targetBaseCapital = settings.initialCapital;
         }
@@ -45,86 +71,494 @@ class TradingSystem {
     // Save Settings to LocalStorage
     saveSettings() {
         if (this.isReadOnly) return;
-        localStorage.setItem('runnerSettings', JSON.stringify(this.settings));
+        localStorage.setItem(`runnerSettings_${this.activeProfileId}`, JSON.stringify(this.settings));
     }
 
     // Load Trades from LocalStorage
     loadTrades() {
-        const saved = localStorage.getItem('runnerTrades');
+        const key = `runnerTrades_${this.activeProfileId}`;
+        const saved = localStorage.getItem(key);
+
+        // Fallback for default profile
+        if (this.activeProfileId === 'default' && !saved) {
+            const legacy = localStorage.getItem('runnerTrades');
+            if (legacy) return JSON.parse(legacy);
+        }
+
         return saved ? JSON.parse(saved) : [];
     }
 
     // Save Trades to LocalStorage
     saveTrades() {
         if (this.isReadOnly) return;
-        localStorage.setItem('runnerTrades', JSON.stringify(this.trades));
+        localStorage.setItem(`runnerTrades_${this.activeProfileId}`, JSON.stringify(this.trades));
     }
 
-    // Initialize System
-    // Initialize System
-    init() {
-        this.checkSharedUrl();
-        this.initTheme();
-        this.setupEventListeners();
+    // Profile Management Methods
+    switchProfile(profileId) {
+        if (this.activeProfileId === profileId) return;
+
+        this.activeProfileId = profileId;
+        localStorage.setItem('activeProfileId', profileId);
+
+        // Reload data for the new profile
+        this.settings = this.loadSettings();
+        this.trades = this.loadTrades();
+        this.currentPage = 1;
+
+        // Re-initialize UI without page refresh
+        this.refreshUI();
+        this.showNotification(`${this.getActiveProfileName()} hesabına geçildi.`, 'info');
+    }
+
+    addNewProfile() {
+        const name = prompt('Yeni portföy ismi giriniz:');
+        if (!name || name.trim() === '') return;
+
+        const id = 'profile_' + Date.now();
+        const newProfile = { id, name };
+
+        this.profiles.push(newProfile);
+        this.saveProfiles();
+
+        // Switch to the new profile
+        this.switchProfile(id);
+    }
+
+    deleteProfile(id, event) {
+        if (event) event.stopPropagation();
+        if (id === 'default') {
+            alert('Ana hesap silinemez!');
+            return;
+        }
+
+        if (confirm('Bu portföyü ve içindeki TÜM verileri silmek istediğinize emin misiniz?')) {
+            // Remove data from localStorage
+            localStorage.removeItem(`runnerSettings_${id}`);
+            localStorage.removeItem(`runnerTrades_${id}`);
+
+            // Remove from profiles list
+            this.profiles = this.profiles.filter(p => p.id !== id);
+            this.saveProfiles();
+
+            // If deleting active profile, switch to default
+            if (this.activeProfileId === id) {
+                this.switchProfile('default');
+            } else {
+                this.renderProfileList();
+            }
+        }
+    }
+
+    saveProfiles() {
+        localStorage.setItem('runnerProfiles', JSON.stringify(this.profiles));
+    }
+
+    getActiveProfileName() {
+        const p = this.profiles.find(p => p.id === this.activeProfileId);
+        return p ? p.name : 'Bilinmeyen';
+    }
+
+    renderProfileList() {
+        const profileList = document.getElementById('profileList');
+        const activeNameSpan = document.getElementById('activeProfileName');
+        if (!profileList) return;
+
+        activeNameSpan.textContent = this.getActiveProfileName();
+        profileList.innerHTML = '';
+
+        this.profiles.forEach(p => {
+            const item = document.createElement('div');
+            item.className = `profile-item ${p.id === this.activeProfileId ? 'active' : ''}`;
+            item.onclick = () => this.switchProfile(p.id);
+
+            item.innerHTML = `
+                <span class="profile-item-name">📁 ${p.name}</span>
+                ${p.id !== 'default' ? `
+                    <button class="delete-profile-btn" onclick="tradingSystem.deleteProfile('${p.id}', event)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                ` : ''}
+            `;
+            profileList.appendChild(item);
+        });
+    }
+
+    // Refresh UI Components
+    refreshUI() {
         this.initChart();
         this.updateDashboard();
         this.renderTradeHistory();
+        this.renderProfileList();
     }
 
-    // Check for Shared URL Data
     checkSharedUrl() {
         const urlParams = new URLSearchParams(window.location.search);
         const sharedData = urlParams.get('data');
 
         if (sharedData) {
             try {
-                // Decode Base64 (handle UTF-8)
-                const jsonString = decodeURIComponent(escape(atob(sharedData)));
-                const data = JSON.parse(jsonString);
+                let jsonString;
+                const decompressed = typeof LZString !== 'undefined' ? LZString.decompressFromEncodedURIComponent(sharedData) : null;
+                jsonString = decompressed || decodeURIComponent(escape(atob(sharedData)));
 
-                if (data.trades && data.settings) {
+                let data = JSON.parse(jsonString);
+
+                // Handle Version 2 (Ultra-Compact Array Format)
+                if (data.v === 2) {
+                    const s = data.s;
+                    this.settings = {
+                        accountMode: s.a === 1 ? 'free' : 'challenge',
+                        initialCapital: s.c,
+                        targetBaseCapital: s.b,
+                        targetGrowth: s.g,
+                        riskPerTrade: s.r,
+                        rLevel: s.l,
+                        lockPercentage: s.p,
+                        manualMode: s.m === 1
+                    };
+
+                    this.trades = data.t.map(t => {
+                        const trade = {
+                            pair: t[0],
+                            result: t[1] === 1 ? 'win' : (t[1] === 2 ? 'be' : 'loss'),
+                            profitLoss: t[2],
+                            timestamp: new Date(t[3] * 1000).toISOString(),
+                            strategyCompliant: t[4] === 1,
+                            balance: 0
+                        };
+
+                        if (t[5] !== 0) {
+                            const b = t[5];
+                            trade.breakdown = b.m === 1 ?
+                                { isMultiTP: true, totalPercent: 100, closes: b.c.map(r => ({ rrr: r[0], percent: r[1], profit: r[2] })) } :
+                                { firstCloseRRR: b.r, firstClosePercent: b.p, runnerCloseRRR: b.rc };
+                        }
+
+                        // Optional Fields (Indices 6, 7, 8)
+                        if (t[6]) trade.notes = t[6];      // Notes
+                        if (t[7]) trade.chartUrl = t[7];  // Chart URL
+                        if (t[8]) trade.direction = t[8] === 1 ? 'long' : 'short'; // Direction
+
+                        return trade;
+                    });
+                }
+                // Handle Version 1 (Compact Keys Format)
+                else if (data.s && data.t) {
+                    this.settings = data.s;
+                    this.trades = data.t.map(t => ({
+                        pair: t.p, result: t.r, profitLoss: t.pl, timestamp: t.ts,
+                        breakdown: t.b, notes: t.n || t.notes || t.note || "",
+                        chartUrl: t.cu || t.chartUrl || "",
+                        direction: t.d || t.direction || "",
+                        strategyCompliant: t.sc, balance: 0
+                    }));
+                }
+                // Legacy Format
+                else if (data.trades && data.settings) {
                     this.trades = data.trades;
                     this.settings = data.settings;
+                    // Ensure archiveName is set for legacy format if not present
+                    if (this.settings.archiveName === undefined) {
+                        this.settings.archiveName = '';
+                    }
+                }
+
+                if (sharedData) {
                     this.isReadOnly = true;
-                    // Force challenge mode for viewing
-                    this.settings.accountMode = 'challenge';
-
-                    console.log('Shared profile loaded:', this.trades.length, 'trades');
-
-                    // UI Adjustments
-                    // We need to wait for DOM to be ready if called in constructor, 
-                    // but init() is called in constructor. 
-                    // Usually DOMContentLoaded calls app init, but here app is new TradingSystem() at end of body.
-                    // So DOM is ready.
-
+                    this.recalculateBalances();
                     const banner = document.getElementById('readOnlyBanner');
                     if (banner) banner.style.display = 'block';
-
-                    // Hide controls
                     const style = document.createElement('style');
-                    style.innerHTML = `
-                        .entry-section, .header-actions, #clearHistoryBtn, .delete-trade-btn, #openCalcBtn { display: none !important; }
-                    `;
+                    style.innerHTML = `.entry-section, .header-actions, #clearHistoryBtn, .delete-trade-btn, #openCalcBtn { display: none !important; }`;
                     document.head.appendChild(style);
+                    document.title = 'Paylaşılan Trading Profili | Runner Tracker';
                 }
             } catch (e) {
                 console.error('Error loading shared data:', e);
-                // alert('Paylaşılan veri okunamadı!');
             }
         }
     }
 
+    // Recalculate all balances in trade history
+    recalculateBalances() {
+        if (!this.trades || this.trades.length === 0) return;
+        const sorted = [...this.trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        let runningBalance = this.settings.initialCapital;
+        sorted.forEach(trade => {
+            runningBalance += trade.profitLoss;
+            trade.balance = runningBalance;
+        });
+        this.trades = sorted;
+    }
+
+    // Handle Close Account and Archive
+    async handleCloseAccount() {
+        if (this.trades.length === 0) {
+            this.showNotification('Arşivlenecek işlem bulunamadı!', 'warning');
+            return;
+        }
+
+        const confirmReset = confirm('DİKKAT: Mevcut dönemi kapatmak üzeresiniz.\n\n1. Tüm işlemleriniz PDF ve EXCEL olarak indirilecek.\n2. İşlem geçmişiniz sıfırlanacak.\n3. Mevcut bakiyeniz yeni dönemin başlangıç sermayesi olacak.\n\nOnaylıyor musunuz?');
+
+        if (!confirmReset) return;
+
+        try {
+            this.showNotification('Dosyalar hazırlanıyor...', 'info');
+
+            // Export to PDF
+            this.exportToPDF();
+
+            // Export to Excel
+            this.exportToExcel();
+
+            // Reset Account Logic (Keep current balance as new start)
+            const newCapital = this.getCurrentBalance();
+            this.settings.initialCapital = newCapital;
+            this.settings.targetBaseCapital = newCapital;
+            this.saveSettings();
+
+            this.trades = [];
+            this.saveTrades();
+
+            this.updateDashboard();
+            this.renderTradeHistory();
+            this.closeSettingsModal();
+
+            setTimeout(() => {
+                alert('Tebrikler! Hesap başarıyla kapatıldı, verileriniz indirildi ve yeni döneminiz başlatıldı. 🚀');
+            }, 500);
+        } catch (error) {
+            console.error('Export error:', error);
+            this.showNotification('Hata oluştu, veriler dışa aktarılamadı.', 'error');
+        }
+    }
+
+    // Export to PDF
+    exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Helper to fix Turkish characters for PDF (since default fonts don't support them)
+        const fixTR = (text) => {
+            if (!text) return "";
+            return text.toString()
+                .replace(/ğ/g, 'g').replace(/Ğ/g, 'G')
+                .replace(/ü/g, 'u').replace(/Ü/g, 'U')
+                .replace(/ş/g, 's').replace(/Ş/g, 'S')
+                .replace(/ı/g, 'i').replace(/İ/g, 'I')
+                .replace(/ö/g, 'o').replace(/Ö/g, 'O')
+                .replace(/ç/g, 'c').replace(/Ç/g, 'C')
+                .replace(/₺/g, 'TL');
+        };
+
+        // Title and Header
+        doc.setFontSize(22);
+        doc.setTextColor(88, 166, 255);
+        doc.text(fixTR(this.settings.archiveName || 'RUNNER TRADER JOURNAL'), 14, 20);
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(fixTR(`Arsiv Tarihi: ${new Date().toLocaleString('tr-TR')}`), 14, 28);
+        doc.text(fixTR(`Mod: ${this.settings.accountMode === 'challenge' ? 'Challenge' : 'Serbest'}`), 14, 33);
+        doc.text(fixTR(`Baslangic Sermayesi: ${this.formatCurrency(this.settings.initialCapital).replace('₺', 'TL')}`), 14, 38);
+        doc.text(fixTR(`Final Bakiyesi: ${this.formatCurrency(this.getCurrentBalance()).replace('₺', 'TL')}`), 14, 43);
+
+        // --- Performance Statistics Section ---
+        doc.setFontSize(14);
+        doc.setTextColor(88, 166, 255);
+        doc.text(fixTR('Performans Ozeti'), 140, 20);
+
+        doc.setFontSize(9);
+        doc.setTextColor(80);
+        doc.text(fixTR(`Toplam Islem: ${this.trades.length}`), 140, 28);
+        doc.text(fixTR(`Win Rate: %${this.getWinRate()}`), 140, 33);
+        doc.text(fixTR(`Net Kar: ${this.formatCurrency(this.getNetProfit()).replace('₺', 'TL')}`), 140, 38);
+        doc.text(fixTR(`Max Drawdown: -%${this.calculateMaxDrawdown()}`), 140, 43);
+        doc.text(fixTR(`Ortalama R: ${this.getAverageRRR()}R`), 140, 48);
+
+        // --- Chart Section ---
+        try {
+            const canvas = document.getElementById('balanceChart');
+            if (canvas) {
+                const chartImg = canvas.toDataURL('image/png', 1.0);
+                // Add chart to PDF (x, y, width, height)
+                doc.addImage(chartImg, 'PNG', 14, 55, 182, 60);
+            }
+        } catch (chartErr) {
+            console.warn('Could not add chart to PDF:', chartErr);
+        }
+
+        const tableColumn = ["#", "Tarih", "Parite", "Yon", "Sonuc", "Kar/Zarar", "Bakiye", "Grafik Linki"];
+        const tableRows = [];
+
+        // Sort descending (newest first)
+        const sorted = [...this.trades].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        sorted.forEach((t, index) => {
+            tableRows.push([
+                sorted.length - index,
+                this.formatDate(t.timestamp),
+                fixTR(t.pair || "-"),
+                fixTR((t.direction || "-").toUpperCase()),
+                fixTR(t.result.toUpperCase()),
+                fixTR(this.formatCurrency(t.profitLoss).replace('₺', 'TL')),
+                fixTR(this.formatCurrency(t.balance).replace('₺', 'TL')),
+                t.chartUrl || "-"
+            ]);
+        });
+
+        doc.autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: 120, // Start after the chart
+            theme: 'striped',
+            headStyles: { fillColor: [88, 166, 255], textColor: [255, 255, 255] },
+            alternateRowStyles: { fillColor: [245, 245, 245] },
+            styles: { font: "helvetica", fontSize: 8 },
+            columnStyles: {
+                7: { cellWidth: 50 }
+            },
+            didDrawCell: (data) => {
+                // Sadece gövde kısmındaki 7. sütun (Grafik Linki) için link oluştur
+                if (data.section === 'body' && data.column.index === 7) {
+                    const url = data.cell.raw;
+                    if (url && url !== "-" && url.startsWith('http')) {
+                        // Link komutunu yeni pencere isteğiyle ekle (Viewer desteğine bağlıdır)
+                        doc.link(data.cell.x, data.cell.y, data.cell.width, data.cell.height, { url: url, target: '_blank' });
+
+                        // Link metni rengini mavi yap
+                        doc.setTextColor(0, 82, 204);
+                    }
+                }
+            }
+        });
+
+        const fileName = (this.settings.archiveName || 'Runner_Arsiv').replace(/\s+/g, '_');
+        doc.save(`${fileName}_${new Date().toISOString().split('T')[0]}.pdf`);
+    }
+
+    // Export to Excel
+    exportToExcel() {
+        // Sort descending: newest first.
+        // We use a combination of timestamp and original index to ensure "last added" is always at the top
+        const tradesWithIndex = this.trades.map((t, i) => ({ ...t, originalIndex: i }));
+        const sorted = tradesWithIndex.sort((a, b) => {
+            const timeA = new Date(a.timestamp).getTime();
+            const timeB = new Date(b.timestamp).getTime();
+            if (timeB !== timeA) return timeB - timeA;
+            return b.originalIndex - a.originalIndex; // If same time, newer index comes first
+        });
+
+        const rows = sorted.map((t, index) => ({
+            "No": sorted.length - index,
+            "Tarih": this.formatDate(t.timestamp),
+            "Parite": t.pair || "-",
+            "Yön": (t.direction || "-").toUpperCase(),
+            "Sonuç": t.result.toUpperCase(),
+            "Kar/Zarar": t.profitLoss,
+            "Bakiye": t.balance,
+            "Notlar": t.notes || "",
+            "Grafik Linki": t.chartUrl || "" // Just providing the URL string is often more reliable for auto-linking
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+
+        // Add actual hyperlinks to the cells so they are clickable
+        const range = XLSX.utils.decode_range(worksheet['!ref']);
+        for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: 8 }); // Column I (index 8) is "Grafik Linki"
+            const cell = worksheet[cellAddress];
+            if (cell && cell.v && cell.v.startsWith('http')) {
+                cell.l = { Target: cell.v, Tooltip: "Grafiği Aç" };
+            }
+        }
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Islem Gecmisi");
+
+        // --- Add Statistics Summary Sheet ---
+        const statsData = [
+            [(this.settings.archiveName || "PERFORMANS OZETI").toUpperCase(), ""],
+            ["Arsiv Tarihi", new Date().toLocaleString('tr-TR')],
+            ["Hesap Modu", this.settings.accountMode.toUpperCase()],
+            ["", ""],
+            ["Baslangic Sermayesi", this.settings.initialCapital],
+            ["Final Bakiyesi", this.getCurrentBalance()],
+            ["Net Kar/Zarar", this.getNetProfit()],
+            ["Win Rate", `%${this.getWinRate()}`],
+            ["Max Drawdown", `%${this.calculateMaxDrawdown()}`],
+            ["Ortalama R", this.getAverageRRR()],
+            ["Toplam Islem", this.trades.length]
+        ];
+        const statsSheet = XLSX.utils.aoa_to_sheet(statsData);
+        XLSX.utils.book_append_sheet(workbook, statsSheet, "Ozet");
+
+        worksheet['!cols'] = [
+            { wch: 5 }, { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
+            { wch: 15 }, { wch: 15 }, { wch: 30 }, { wch: 45 }
+        ];
+
+        const fileName = (this.settings.archiveName || 'Runner_Arsiv').replace(/\s+/g, '_');
+        XLSX.writeFile(workbook, `${fileName}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
     // Generate Share Link
     generateShareLink() {
-        const data = {
-            settings: this.settings,
-            trades: this.trades
+        // SUPER COMPACTION: Map everything to single letters/numbers
+        const s = this.settings;
+        const compactSettings = {
+            a: s.accountMode === 'free' ? 1 : 0,
+            c: s.initialCapital,
+            b: s.targetBaseCapital || s.initialCapital,
+            g: s.targetGrowth,
+            r: s.riskPerTrade,
+            l: s.rLevel,
+            p: s.lockPercentage,
+            m: s.manualMode ? 1 : 0,
+            n: s.archiveName || '' // Add archiveName to compact settings
         };
-        const jsonString = JSON.stringify(data);
-        // Encode Base64 (handle UTF-8)
-        const encoded = btoa(unescape(encodeURIComponent(jsonString)));
 
-        // Use href split to support both file:// and https:// (GitHub Pages) correctly
+        const compactTrades = this.trades.map(t => {
+            const entry = [
+                t.pair,
+                t.result === 'win' ? 1 : (t.result === 'be' ? 2 : 0),
+                Math.round(t.profitLoss * 100) / 100,
+                Math.round(new Date(t.timestamp).getTime() / 1000), // Unix timestamp
+                t.strategyCompliant ? 1 : 0
+            ];
+
+            if (t.breakdown) {
+                const b = t.breakdown;
+                const compactB = b.isMultiTP ?
+                    { m: 1, c: b.closes.map(row => [row.rrr, row.percent, Math.round(row.profit || 0)]) } :
+                    { m: 0, r: b.firstCloseRRR, p: b.firstClosePercent, rc: b.runnerCloseRRR || 0 };
+                entry.push(compactB);
+            } else {
+                entry.push(0);
+            }
+
+            // Extended Fields
+            entry.push(t.notes || ""); // Index 6
+            entry.push(t.chartUrl || ""); // Index 7
+            entry.push(t.direction === 'long' ? 1 : (t.direction === 'short' ? 2 : 0)); // Index 8
+
+            return entry;
+        });
+
+        const finalData = { s: compactSettings, t: compactTrades, v: 2 }; // Version 2
+        const jsonString = JSON.stringify(finalData);
+
+        let encoded;
+        if (typeof LZString !== 'undefined') {
+            encoded = LZString.compressToEncodedURIComponent(jsonString);
+        } else {
+            encoded = btoa(unescape(encodeURIComponent(jsonString)));
+        }
+
         const baseUrl = window.location.href.split('?')[0];
         return `${baseUrl}?data=${encoded}`;
     }
@@ -156,7 +590,15 @@ class TradingSystem {
     // CHART SYSTEM
     // ===================================
     initChart() {
-        const ctx = document.getElementById('balanceChart').getContext('2d');
+        const canvas = document.getElementById('balanceChart');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        // Destroy existing chart to allow reconstruction
+        if (this.chart) {
+            this.chart.destroy();
+        }
 
         // Chart.js Configuration
         Chart.defaults.color = '#8b949e';
@@ -640,24 +1082,59 @@ class TradingSystem {
         const isFreeMode = (this.settings.accountMode === 'free');
 
         // Labels & Upper Cards
+        const card1 = document.querySelector('.target-card.primary');
+        const card2 = document.querySelector('.target-card.success');
+        const card3 = document.querySelector('.target-card.warning');
+        const targetGrid = document.querySelector('.target-grid');
+
         if (isFreeMode) {
-            // FREE MODE
+            // FREE MODE - Simplified View
             document.getElementById('targetBadge').textContent = 'Serbest Mod';
 
-            // Card 1: Growth
-            document.getElementById('cardLabel1').textContent = 'Net Bakiye Artışı';
-            document.getElementById('targetProfit').textContent = this.formatCurrency(this.getNetProfit());
-            document.getElementById('cardSub1').textContent = 'Toplam Büyüme';
+            // Hide other cards, show only relevant info
+            if (card1) card1.style.display = 'none';
+            if (card3) card3.style.display = 'none';
 
-            // Card 3: Balance
-            document.getElementById('cardLabel3').textContent = 'Güncel Bakiye';
-            document.getElementById('remainingProfit').textContent = this.formatCurrency(this.getCurrentBalance());
-            document.getElementById('remainingTrades').textContent = 'Sınırsız İşlem';
+            // Adjust Grid to single column centered
+            if (targetGrid) {
+                targetGrid.style.gridTemplateColumns = '1fr';
+                targetGrid.style.maxWidth = '400px';
+                targetGrid.style.margin = '0 auto 2rem auto';
+            }
 
-            document.getElementById('progressLabel').textContent = 'Büyüme Oranı';
+            // Card 2: Growth Focus
+            if (card2) {
+                card2.style.display = 'flex';
+                // Change label to differentiate
+                document.getElementById('currentProfit').previousElementSibling.textContent = 'Net Büyüme';
+                // Update value
+                document.getElementById('currentProfit').textContent = this.formatCurrency(this.getNetProfit());
+                // Update sublabel
+                const progress = this.settings.initialCapital > 0
+                    ? (this.getNetProfit() / this.settings.initialCapital) * 100
+                    : 0;
+                document.getElementById('profitChange').textContent = `%${progress.toFixed(2)} Büyüme`;
+                document.getElementById('profitChange').className = progress >= 0 ? 'card-sublabel text-success' : 'card-sublabel text-danger';
+            }
+
+            document.getElementById('progressLabel').textContent = 'Büyüme İlerlemesi';
 
         } else {
-            // CHALLENGE MODE
+            // CHALLENGE MODE - Restore Standard View
+            if (card1) card1.style.display = 'flex';
+            if (card3) card3.style.display = 'flex';
+            if (card2) {
+                card2.style.display = 'flex';
+                document.getElementById('currentProfit').previousElementSibling.textContent = 'Güncel Net Kâr';
+            }
+
+            // Restore Grid
+            if (targetGrid) {
+                targetGrid.style.gridTemplateColumns = ''; // Reset to css default
+                targetGrid.style.maxWidth = '';
+                targetGrid.style.margin = '';
+            }
+
             document.getElementById('targetBadge').textContent = this.getProgressPercentage() >= 100 ? 'Tamamlandı ✓' : 'Aktif';
 
             // Card 1: Target
@@ -674,6 +1151,15 @@ class TradingSystem {
                 estimatedTrades > 0 ? `~${estimatedTrades} işlem gerekli` : 'Hedef tamamlandı!';
 
             document.getElementById('progressLabel').textContent = 'Tamamlanma Oranı';
+        }
+
+        // Progress Container
+        const progressContainer = document.querySelector('.progress-container');
+
+        if (isFreeMode) {
+            if (progressContainer) progressContainer.style.display = 'none';
+        } else {
+            if (progressContainer) progressContainer.style.display = 'block';
         }
 
         // Card 2: Current Net Profit (Common)
@@ -715,52 +1201,65 @@ class TradingSystem {
             profitChangeEl.className = 'card-sublabel';
         }
 
-        // Target Badge
+        // Target Badge & Share Button Logic
         const targetBadge = document.getElementById('targetBadge');
-        if (progress >= 100) {
-            targetBadge.textContent = 'Tamamlandı ✓';
-            targetBadge.style.background = 'rgba(16, 185, 129, 0.15)';
-            targetBadge.style.borderColor = 'var(--accent-success)';
-            targetBadge.style.color = 'var(--accent-success)';
 
-            // Show Share Button if not read only
-            if (!this.isReadOnly) {
-                let shareBtn = document.getElementById('shareChallengeBtn');
-                if (!shareBtn) {
-                    shareBtn = document.createElement('button');
-                    shareBtn.id = 'shareChallengeBtn';
-                    shareBtn.className = 'btn-primary';
-                    shareBtn.style.marginTop = '1rem';
-                    shareBtn.style.width = '100%';
-                    shareBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                    shareBtn.innerHTML = '🏆 Hesabı Tamamla ve Paylaş';
+        if (isFreeMode) {
+            // Free Mode: No "completion", always active. No share button for completion.
+            targetBadge.textContent = 'Serbest Mod';
+            targetBadge.style.background = 'rgba(88, 166, 255, 0.15)';
+            targetBadge.style.borderColor = 'var(--accent-primary)';
+            targetBadge.style.color = 'var(--accent-primary)';
 
-                    // Insert after progress container
-                    const progressContainer = document.querySelector('.progress-container');
-                    if (progressContainer && !progressContainer.nextElementSibling?.id === 'shareChallengeBtn') {
-                        progressContainer.parentNode.insertBefore(shareBtn, progressContainer.nextSibling);
-                    } else if (progressContainer) {
-                        // Check if already exists to avoid dupes
-                        if (!document.getElementById('shareChallengeBtn')) {
-                            progressContainer.insertAdjacentElement('afterend', shareBtn);
-                        }
-                    }
-
-                    // Add listener immediately or in setupEventListeners (but element is dynamic)
-                    // Better to add inline onclick or attach here
-                    shareBtn.onclick = () => {
-                        this.openShareModal('win');
-                    };
-                }
-            }
-        } else {
-            targetBadge.textContent = 'Aktif';
-            targetBadge.style.background = 'rgba(16, 185, 129, 0.15)';
-            targetBadge.style.borderColor = 'var(--accent-success)';
-            targetBadge.style.color = 'var(--accent-success)';
-            // Remove share button if exists (in case user deletes a win trade)
+            // Ensure share button is removed
             const shareBtn = document.getElementById('shareChallengeBtn');
             if (shareBtn) shareBtn.remove();
+
+        } else {
+            // Challenge Mode Logic
+            if (progress >= 100) {
+                targetBadge.textContent = 'Tamamlandı ✓';
+                targetBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+                targetBadge.style.borderColor = 'var(--accent-success)';
+                targetBadge.style.color = 'var(--accent-success)';
+
+                // Show Share Button if not read only
+                if (!this.isReadOnly) {
+                    let shareBtn = document.getElementById('shareChallengeBtn');
+                    if (!shareBtn) {
+                        shareBtn = document.createElement('button');
+                        shareBtn.id = 'shareChallengeBtn';
+                        shareBtn.className = 'btn-primary';
+                        shareBtn.style.marginTop = '1rem';
+                        shareBtn.style.width = '100%';
+                        shareBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                        shareBtn.innerHTML = '🏆 Hesabı Tamamla ve Paylaş';
+
+                        // Insert after progress container
+                        if (progressContainer && !progressContainer.nextElementSibling?.id === 'shareChallengeBtn') {
+                            progressContainer.parentNode.insertBefore(shareBtn, progressContainer.nextSibling);
+                        } else if (progressContainer) {
+                            // Check if already exists to avoid dupes
+                            if (!document.getElementById('shareChallengeBtn')) {
+                                progressContainer.insertAdjacentElement('afterend', shareBtn);
+                            }
+                        }
+
+                        // Add listener
+                        shareBtn.onclick = () => {
+                            this.openShareModal('win');
+                        };
+                    }
+                }
+            } else {
+                targetBadge.textContent = 'Aktif';
+                targetBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+                targetBadge.style.borderColor = 'var(--accent-success)';
+                targetBadge.style.color = 'var(--accent-success)';
+                // Remove share button if exists
+                const shareBtn = document.getElementById('shareChallengeBtn');
+                if (shareBtn) shareBtn.remove();
+            }
         }
 
         // Metrics
@@ -966,6 +1465,13 @@ class TradingSystem {
                         <div class="trade-badges">
                             <span class="trade-result-badge ${resultClass}">${resultText}</span>
                             ${strategyBadge}
+                            ${trade.chartUrl ? `<a href="${trade.chartUrl}" target="_blank" class="chart-btn" title="İşlem Grafiğini Gör">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </a>` : ''}
                             <button class="delete-trade-btn" onclick="tradingSystem.deleteTrade(${trade.id})" title="İşlemi Sil">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -1004,6 +1510,30 @@ class TradingSystem {
         // Theme Toggle
         document.getElementById('themeBtn').addEventListener('click', () => {
             this.toggleTheme();
+        });
+
+        // Profile Switcher
+        const profileBtn = document.getElementById('currentProfileTitle');
+        const profileDropdown = document.getElementById('profileDropdown');
+        const addProfileBtn = document.getElementById('addProfileBtn');
+
+        if (profileBtn && profileDropdown) {
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('active');
+            });
+        }
+
+        if (addProfileBtn) {
+            addProfileBtn.addEventListener('click', () => {
+                this.addNewProfile();
+                profileDropdown.classList.remove('active');
+            });
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', () => {
+            if (profileDropdown) profileDropdown.classList.remove('active');
         });
 
         // Settings Modal
@@ -1071,6 +1601,13 @@ class TradingSystem {
             this.saveSettingsFromForm();
         });
 
+        // Account Mode Toggle Listener
+        document.getElementsByName('accountMode').forEach(radio => {
+            radio.addEventListener('change', () => {
+                this.updateSettingsVisibility();
+            });
+        });
+
         document.getElementById('resetSettings').addEventListener('click', () => {
             this.resetSettings();
         });
@@ -1101,6 +1638,14 @@ class TradingSystem {
         document.getElementById('clearHistoryBtn').addEventListener('click', () => {
             this.clearAllTrades();
         });
+
+        // Close Account & Archive
+        const closeAccountBtn = document.getElementById('closeAccountBtn');
+        if (closeAccountBtn) {
+            closeAccountBtn.addEventListener('click', () => {
+                this.handleCloseAccount();
+            });
+        }
 
         // Pagination
         document.getElementById('prevPageBtn').addEventListener('click', () => {
@@ -1391,6 +1936,8 @@ class TradingSystem {
         const notes = document.getElementById('tradeNotes').value.trim();
         const isMultiTP = document.getElementById('multiTPToggle').value === 'yes';
 
+        const chartUrl = document.getElementById('chartUrl').value.trim();
+
         // Validation
         if (!pair || !direction || !result) {
             alert('Lütfen parite, yön ve işlem sonucunu doldurun');
@@ -1401,6 +1948,7 @@ class TradingSystem {
             pair: pair,
             direction: direction,
             result: result,
+            chartUrl: chartUrl,
             notes: notes,
             profitLoss: 0,
             breakdown: {}
@@ -1555,12 +2103,16 @@ class TradingSystem {
 
     openSettingsModal() {
         // Populate form with current settings
+        document.getElementById('archiveName').value = this.settings.archiveName || 'RUNNER TRADER JOURNAL';
         document.getElementById('initialCapital').value = this.settings.initialCapital;
         document.getElementById('targetGrowth').value = this.settings.targetGrowth;
         document.getElementById('riskPerTrade').value = this.settings.riskPerTrade;
         document.getElementById('rLevel').value = this.settings.rLevel;
         document.getElementById('lockPercentage').value = this.settings.lockPercentage;
         document.getElementById('manualMode').checked = this.settings.manualMode;
+
+        // Add listener for manual mode toggle in settings
+        document.getElementById('manualMode').onchange = () => this.updateSettingsVisibility();
 
         // Account Mode Logic
         const mode = this.settings.accountMode || 'challenge'; // Default legacy to challenge
@@ -1574,10 +2126,56 @@ class TradingSystem {
         });
         if (!found && radios.length > 0) radios[0].checked = true;
 
-        // Trigger manual update of input visibility
-        if (typeof toggleTargetInput === 'function') toggleTargetInput();
+        // Trigger visibility update
+        this.updateSettingsVisibility();
 
         document.getElementById('settingsModal').classList.add('active');
+    }
+
+    updateSettingsVisibility() {
+        const isFreeMode = document.querySelector('input[name="accountMode"][value="free"]').checked;
+        const isManual = document.getElementById('manualMode').checked;
+
+        // Elements and Sections to toggle
+        const targetBase = document.getElementById('targetBaseGroup');
+        const targetGrowth = document.getElementById('targetGrowthGroup');
+        const manualGroup = document.getElementById('manualModeGroup');
+        const riskSection = document.getElementById('riskManagementSection');
+
+        // Update the main mode description dynamically
+        const modeDesc = document.getElementById('modeDescription');
+        if (modeDesc) {
+            if (isFreeMode) {
+                modeDesc.textContent = '📈 Serbest modda büyüme sınırsızdır. Sadece sermayenizi büyütmeye odaklanırsınız.';
+                modeDesc.style.color = '#2ea043';
+            } else {
+                modeDesc.textContent = '🎯 Challenge modunda belirli bir kâr hedefine ulaşmaya çalışırsınız.';
+                modeDesc.style.color = '#58a6ff';
+            }
+        }
+
+        if (isFreeMode) {
+            // Free Mode UI
+            if (targetBase) targetBase.style.display = 'none';
+            if (targetGrowth) targetGrowth.style.display = 'none';
+            if (riskSection) riskSection.style.display = 'none';
+            if (manualGroup) manualGroup.style.display = 'none';
+
+            document.getElementById('manualMode').checked = true;
+        } else {
+            // Challenge Mode UI
+            if (targetBase) targetBase.style.display = 'block';
+            if (targetGrowth) targetGrowth.style.display = 'block';
+            if (manualGroup) manualGroup.style.display = 'block';
+
+            // Handle Risk Management Section Visibility
+            if (riskSection) {
+                riskSection.style.display = isManual ? 'none' : 'block';
+            }
+
+            // Ensure descriptions are visible in challenge mode
+            document.querySelectorAll('.settings-section .form-group small').forEach(s => s.style.display = 'block');
+        }
     }
 
     closeSettingsModal() {
@@ -1600,7 +2198,13 @@ class TradingSystem {
             targetBaseCapital = initialCapital;
         }
 
+        // In Free Mode, always sync Base with Initial to avoid "negative growth" ghosting
+        if (accountMode === 'free') {
+            targetBaseCapital = initialCapital;
+        }
+
         const newSettings = {
+            archiveName: document.getElementById('archiveName').value || 'RUNNER TRADER JOURNAL',
             initialCapital: initialCapital,
             targetBaseCapital: targetBaseCapital,
             targetGrowth: parseFloat(document.getElementById('targetGrowth').value),
@@ -1625,6 +2229,8 @@ class TradingSystem {
         } else {
             // Free mode default target (needed for calculations not to break)
             newSettings.targetGrowth = 100;
+            // Force manual mode as true in Free Mode
+            newSettings.manualMode = true;
         }
 
         if (newSettings.riskPerTrade < 0.1 || newSettings.riskPerTrade > 5) {
@@ -1652,6 +2258,7 @@ class TradingSystem {
             this.saveSettings();
 
             // Refresh form values
+            document.getElementById('archiveName').value = this.settings.archiveName;
             document.getElementById('initialCapital').value = this.settings.initialCapital;
             document.getElementById('targetBaseCapital').value = this.settings.targetBaseCapital || this.settings.initialCapital;
             document.getElementById('targetGrowth').value = this.settings.targetGrowth;
@@ -1695,6 +2302,7 @@ class TradingSystem {
         this.saveTrades();
 
         // Refresh form values
+        document.getElementById('archiveName').value = this.settings.archiveName;
         document.getElementById('initialCapital').value = this.settings.initialCapital;
         document.getElementById('targetGrowth').value = this.settings.targetGrowth;
         document.getElementById('riskPerTrade').value = this.settings.riskPerTrade;
