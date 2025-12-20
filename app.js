@@ -1456,40 +1456,52 @@ class TradingSystem {
             }
 
             return `
-                <div class="trade-item">
-                    <div class="trade-header">
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                             <span class="trade-number">#${tradeNumber} ${trade.pair ? `• ${trade.pair}` : ''}</span>
-                             ${trade.direction ? `<span style="font-size: 0.85rem; color: ${trade.direction === 'long' ? 'var(--accent-success)' : 'var(--accent-danger)'}; font-weight: 500;">${trade.direction === 'long' ? 'LONG 🔼' : 'SHORT 🔻'}</span>` : ''}
+                <div class="trade-item ${trade.result}">
+                    <div class="trade-main-info">
+                        <div class="trade-id-row">
+                            <span class="trade-number">#${tradeNumber} ${trade.pair ? `• ${trade.pair}` : ''}</span>
                         </div>
-                        <div class="trade-badges">
-                            <span class="trade-result-badge ${resultClass}">${resultText}</span>
-                            ${strategyBadge}
-                            ${trade.chartUrl ? `<a href="${trade.chartUrl}" target="_blank" class="chart-btn" title="İşlem Grafiğini Gör">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                    <polyline points="15 3 21 3 21 9"></polyline>
-                                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                                </svg>
-                            </a>` : ''}
-                            <button class="delete-trade-btn" onclick="tradingSystem.deleteTrade(${trade.id})" title="İşlemi Sil">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="trade-details">
-                        <div class="trade-detail-item">
-                            <span class="trade-detail-label">Tarih</span>
-                            <span class="trade-detail-value">${this.formatDate(trade.timestamp)}</span>
-                        </div>
-                        <div class="trade-detail-item">
-                            <span class="trade-detail-label">Nihai Bakiye</span>
-                            <span class="trade-detail-value">${this.formatCurrency(trade.balance)}</span>
+                        ${trade.direction ? `
+                        <div class="trade-direction-row">
+                            <span class="direction-text ${trade.direction}">${trade.direction === 'long' ? 'LONG 🔼' : 'SHORT 🔻'}</span>
+                        </div>` : ''}
+                        
+                        <div class="trade-action-bar">
+                            <div class="trade-badges">
+                                <span class="trade-result-badge ${resultClass}">${resultText}</span>
+                                ${strategyBadge}
+                            </div>
+                            <div class="trade-quick-actions">
+                                ${trade.chartUrl ? `<a href="${trade.chartUrl}" target="_blank" class="chart-btn" title="İşlem Grafiğini Gör">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                    </svg>
+                                </a>` : ''}
+                                <button class="delete-icon-btn" onclick="tradingSystem.deleteTrade(${trade.id})" title="İşlemi Sil">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="trade-divider"></div>
+
+                    <div class="trade-details-v2">
+                        <div class="detail-group">
+                            <span class="detail-label">Tarih</span>
+                            <span class="detail-value">${this.formatDate(trade.timestamp)}</span>
+                        </div>
+                        <div class="detail-group">
+                            <span class="detail-label">Nihai Bakiye</span>
+                            <span class="detail-value highlight">${this.formatCurrency(trade.balance)}</span>
+                        </div>
+                    </div>
+
                     ${breakdownHTML}
                     ${trade.notes ? `<div class="trade-notes">📝 ${trade.notes}</div>` : ''}
                 </div>
@@ -1896,10 +1908,10 @@ class TradingSystem {
 
         row.innerHTML = `
             <div class="form-group">
-                <input type="number" class="tp-rrr" placeholder="R Seviyesi (Örn: 1.5)" step="0.1" required>
+                <input type="number" class="tp-rrr" placeholder="R Seviyesi (Örn: 2.5)" step="0.1" required>
             </div>
             <div class="form-group">
-                <input type="number" class="tp-percent" placeholder="Yüzde % (Örn: 50)" max="100" required>
+                <input type="number" class="tp-percent" placeholder="Kapanan % (Örn: 25)" max="100" required>
             </div>
             ${profitInput}
             <button type="button" class="remove-tp-btn" onclick="this.parentElement.remove(); tradingSystem.updateTotalPercent()">

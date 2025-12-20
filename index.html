@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
@@ -81,12 +81,9 @@
     </header>
 
     <!-- Read Only Banner -->
-    <div id="readOnlyBanner"
-        style="display: none; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; text-align: center; padding: 12px; font-weight: 500; font-size: 0.95rem;">
-        👁️ Bu paylaşılan bir profildir. Sadece görüntüleme modundasınız.
-        <a href="index.html"
-            style="color: white; text-decoration: underline; margin-left: 10px; font-weight: 700;">Kendi Takibini
-            Başlat</a>
+    <div id="readOnlyBanner" class="read-only-banner">
+        <span>👁️ Bu paylaşılan bir profildir. Sadece görüntüleme modundasınız.</span>
+        <a href="index.html">Kendi Takibini Başlat</a>
     </div>
 
     <!-- Main Container -->
@@ -228,8 +225,7 @@
                 </div>
 
                 <form class="trade-form" id="tradeForm">
-                    <div class="form-grid"
-                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-grid">
                         <!-- Pair and Direction -->
                         <div class="form-group">
                             <label for="tradePair">Parite</label>
@@ -246,7 +242,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group full-width" style="margin-bottom: 1rem;">
+                    <div class="form-group full-width">
                         <label for="chartUrl">TradingView Link (Opsiyonel)</label>
                         <input type="url" id="chartUrl" placeholder="https://www.tradingview.com/x/..."
                             style="width: 100%;">
