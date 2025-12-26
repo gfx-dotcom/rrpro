@@ -1631,3 +1631,227 @@ textarea:focus {
         transform: translateY(0);
     }
 }
+
+/* Trade Calendar Styles */
+.trade-calendar-section {
+    margin-bottom: var(--spacing-lg);
+    max-width: 800px;
+    /* Desktop'ta çok yayılmasın */
+}
+
+.calendar-header-clickable {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    user-select: none;
+}
+
+.calendar-header-clickable:hover .section-title-wrapper h2 {
+    color: var(--accent-primary);
+}
+
+.calendar-toggle-icon {
+    transition: transform 0.3s ease;
+    color: var(--text-secondary);
+}
+
+.calendar-section-collapsed .calendar-toggle-icon {
+    transform: rotate(-180deg);
+}
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-input);
+    padding: 4px 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 0px 6px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#currentMonthYear {
+    font-weight: 600;
+    font-size: 0.8rem;
+    min-width: 100px;
+    text-align: center;
+}
+
+.calendar-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease;
+    max-height: 1000px;
+    opacity: 1;
+    margin-top: 10px;
+}
+
+.calendar-section-collapsed .calendar-wrapper {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    border-color: transparent;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    min-width: 0;
+    /* Remove restriction for better sizing */
+}
+
+.calendar-header-day {
+    text-align: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    padding-bottom: 4px;
+}
+
+.calendar-day {
+    min-height: 55px;
+    /* Masaüstünde daha kompakt yükseklik */
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: all 0.2s;
+}
+
+.calendar-day.empty {
+    background: transparent;
+    border: none;
+}
+
+.calendar-day.today {
+    border: 1.5px solid var(--accent-primary);
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.15);
+}
+
+.day-number {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.day-profit {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: right;
+    letter-spacing: -0.02em;
+}
+
+.calendar-day.profit {
+    background: rgba(46, 204, 113, 0.12);
+    border: 1px solid rgba(46, 204, 113, 0.25);
+}
+
+.calendar-day.profit .day-profit {
+    color: #2ecc71;
+}
+
+.calendar-day.loss {
+    background: rgba(231, 76, 60, 0.12);
+    border: 1px solid rgba(231, 76, 60, 0.25);
+}
+
+.calendar-day.loss .day-profit {
+    color: #e74c3c;
+}
+
+.calendar-day:hover:not(.empty) {
+    background: rgba(255, 255, 255, 0.08);
+    transform: scale(1.02);
+    z-index: 1;
+}
+
+/* Mobile Optimizations for Calendar */
+@media (max-width: 600px) {
+    .calendar-header-clickable {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        position: relative;
+    }
+
+    .section-title-wrapper {
+        flex-wrap: wrap;
+        width: calc(100% - 30px);
+    }
+
+    .calendar-header-clickable h2 {
+        font-size: 0.9rem !important;
+        white-space: nowrap;
+    }
+
+    .calendar-nav {
+        margin-left: 0 !important;
+        width: 100%;
+        justify-content: space-between;
+        padding: 5px 12px;
+    }
+
+    .calendar-wrapper {
+        padding: 8px 3px;
+        /* Minimal side padding */
+        overflow-x: auto;
+        /* Safety for very small screens */
+    }
+
+    .calendar-toggle-icon {
+        position: absolute;
+        right: 0;
+        top: 10px;
+    }
+
+    .calendar-grid {
+        gap: 2px;
+        min-width: 290px;
+        /* Minimum width to prevent crushing */
+        width: 100%;
+    }
+
+    .calendar-day {
+        padding: 4px 1px;
+        min-height: 42px;
+    }
+
+    .day-number {
+        font-size: 0.6rem;
+    }
+
+    .day-profit {
+        font-size: 0.55rem;
+        letter-spacing: -0.04em;
+    }
+
+    .calendar-header-day {
+        font-size: 0.5rem;
+        padding-bottom: 2px;
+    }
+}

@@ -82,8 +82,16 @@
 
     <!-- Read Only Banner -->
     <div id="readOnlyBanner" class="read-only-banner">
-        <span>👁️ Bu paylaşılan bir profildir. Sadece görüntüleme modundasınız.</span>
-        <a href="index.html">Kendi Takibini Başlat</a>
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+            <span style="font-weight: 600; font-size: 1rem;" data-i18n="snapshot_title">📸 Bu Link Anlık Görüntü
+                İçerir</span>
+            <span style="font-size: 0.9rem; opacity: 0.9;" data-i18n="snapshot_desc">Bu link paylaşıldığı andaki
+                trade'leri gösterir. Daha sonra eklenen veya silinen trade'leri görmek için hesap sahibinden güncel
+                linki isteyiniz.</span>
+        </div>
+        <a href="index.html"
+            style="white-space: nowrap; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 6px; text-decoration: none; font-weight: 500;"
+            data-i18n="start_your_own">Kendi Takibini Başlat</a>
     </div>
 
     <!-- Main Container -->
@@ -93,27 +101,28 @@
             <!-- Target Status Section -->
             <section class="target-section">
                 <div class="section-header">
-                    <h2>🎯 HEDEF DURUMU</h2>
-                    <div class="target-badge" id="targetBadge">Aktif</div>
+                    <h2 data-i18n="account_mode">🎯 HEDEF DURUMU</h2>
+                    <div class="target-badge" id="targetBadge" data-i18n="active">Aktif</div>
                 </div>
 
                 <div class="target-grid">
                     <div class="target-card primary">
-                        <div class="card-label" id="cardLabel1">Hedeflenen Kâr</div>
+                        <div class="card-label" id="cardLabel1" data-i18n="targeted_profit">Hedeflenen Kâr</div>
                         <div class="card-value" id="targetProfit">4,000 ₺</div>
-                        <div class="card-sublabel" id="cardSub1">%8 Büyüme Hedefi</div> <!-- Added ID -->
+                        <div class="card-sublabel" id="cardSub1" data-i18n="target_growth_percentage_full">%8 Büyüme
+                            Hedefi</div>
                     </div>
 
                     <div class="target-card success">
-                        <div class="card-label">Güncel Net Kâr</div>
+                        <div class="card-label" data-i18n="net_profit_loss">Güncel Net Kâr</div>
                         <div class="card-value" id="currentProfit">0 ₺</div>
-                        <div class="card-sublabel" id="profitChange">Başlangıç</div>
+                        <div class="card-sublabel" id="profitChange" data-i18n="starting">Başlangıç</div>
                     </div>
 
                     <div class="target-card warning">
-                        <div class="card-label" id="cardLabel3">Hedefe Kalan</div>
+                        <div class="card-label" id="cardLabel3" data-i18n="remaining_to_target">Hedefe Kalan</div>
                         <div class="card-value" id="remainingProfit">4,000 ₺</div>
-                        <div class="card-sublabel" id="remainingTrades">~0 işlem gerekli</div>
+                        <div class="card-sublabel" id="remainingTrades" data-i18n="no_trades_yet">~0 işlem gerekli</div>
                     </div>
                 </div>
 
@@ -137,6 +146,29 @@
                 </div>
                 <div class="chart-container">
                     <canvas id="balanceChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Trade Calendar Section -->
+            <section class="trade-calendar-section" id="tradeCalendarSection">
+                <div class="calendar-header-clickable" id="toggleCalendar">
+                    <div class="section-title-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                        <h2 data-i18n="pnl_calendar" style="margin:0; font-size: 1rem;">📅 KÂR/ZARAR TAKVİMİ</h2>
+                        <div class="calendar-nav" onclick="event.stopPropagation()">
+                            <button id="prevMonth" class="nav-btn">◀</button>
+                            <span id="currentMonthYear">--</span>
+                            <button id="nextMonth" class="nav-btn">▶</button>
+                        </div>
+                    </div>
+                    <div class="calendar-toggle-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="calendar-wrapper" id="pnlCalendar">
+                    <!-- Calendar content will be injected via JS -->
                 </div>
             </section>
 
@@ -204,6 +236,8 @@
                 </div>
             </section>
 
+
+
             <!-- Trade Entry Form -->
             <section class="entry-section">
                 <div class="section-header">
@@ -219,8 +253,7 @@
                             <line x1="8" y1="18" x2="8" y2="18"></line>
                             <line x1="12" y1="18" x2="12" y2="18"></line>
                             <line x1="16" y1="18" x2="16" y2="18"></line>
-                        </svg>
-                        Hesap Makinesi
+                        </svg><span data-i18n="calculator"></span>
                     </button>
                 </div>
 
@@ -228,16 +261,16 @@
                     <div class="form-grid">
                         <!-- Pair and Direction -->
                         <div class="form-group">
-                            <label for="tradePair">Parite</label>
+                            <label for="tradePair" data-i18n="pair">Parite</label>
                             <input type="text" id="tradePair" placeholder="Örn: USDJPY"
                                 style="text-transform: uppercase;" required>
                         </div>
                         <div class="form-group">
-                            <label for="tradeDirection">Yön</label>
+                            <label for="tradeDirection" data-i18n="direction">Yön</label>
                             <select id="tradeDirection" required>
-                                <option value="">Seçiniz...</option>
-                                <option value="long">Long (Alış) 🔼</option>
-                                <option value="short">Short (Satış) 🔻</option>
+                                <option value="" data-i18n="select_option">Seçiniz...</option>
+                                <option value="long" data-i18n="long_option">Long (Alış) 🔼</option>
+                                <option value="short" data-i18n="short_option">Short (Satış) 🔻</option>
                             </select>
                         </div>
                     </div>
@@ -279,7 +312,8 @@
                         <div class="multi-tp-container" id="multiTPContainer" style="display: none;">
                             <div class="form-header-row">
                                 <label>Kar Alım Seviyeleri</label>
-                                <button type="button" class="add-tp-btn" id="addTPRowBtn">+ Yeni Seviye Ekle</button>
+                                <button type="button" class="add-tp-btn" id="addTPRowBtn">+ Yeni Seviye
+                                    Ekle</button>
                             </div>
                             <div id="tpRows">
                                 <!-- Dynamic Rows Will Be Added Here -->
@@ -328,12 +362,12 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="submit-btn">
+                    <button type="submit" class="submit-btn" id="submitTradeBtn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path d="M12 5v14m-7-7h14"></path>
                         </svg>
-                        İşlemi Kaydet
+                        <span>İşlemi Kaydet</span>
                     </button>
                 </form>
             </section>
@@ -389,7 +423,7 @@
         <div class="modal-overlay" id="modalOverlay"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>⚙️ Sistem Ayarları</h3>
+                <h3 data-i18n="settings_modal_title">⚙️ Sistem Ayarları</h3>
                 <button class="modal-close" id="modalClose">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 6L6 18M6 6l12 12"></path>
@@ -401,90 +435,122 @@
                 <form id="settingsForm">
                     <!-- Section 1: Account Mode -->
                     <div class="settings-section">
-                        <div class="settings-section-title">⚖️ Hesap Modu Seçimi</div>
+                        <div class="settings-section-title" data-i18n="account_mode_title">⚖️ Hesap Modu Seçimi</div>
                         <div class="form-group">
                             <div class="radio-group">
                                 <label class="radio-label">
                                     <input type="radio" name="accountMode" value="challenge" checked
                                         onchange="toggleTargetInput()">
-                                    <span>🎯 Challenge (Hedefli)</span>
+                                    <span data-i18n="mode_challenge">🎯 Challenge (Hedefli)</span>
                                 </label>
                                 <label class="radio-label">
                                     <input type="radio" name="accountMode" value="free" onchange="toggleTargetInput()">
-                                    <span>📈 Serbest (Bakiye)</span>
+                                    <span data-i18n="mode_free">📈 Serbest (Bakiye)</span>
                                 </label>
                             </div>
-                            <small id="modeDescription">Challenge modunda belirli bir kâr hedefine ulaşmaya
+                            <small id="modeDescription" data-i18n="mode_desc_challenge">Challenge modunda belirli bir
+                                kâr hedefine ulaşmaya
                                 çalışırsınız.</small>
                         </div>
                     </div>
 
                     <!-- Section 2: Capital & Target -->
                     <div class="settings-section">
-                        <div class="settings-section-title">💰 Sermaye ve Hedef Ayarları</div>
+                        <div class="settings-section-title" data-i18n="capital_settings_title">💰 Sermaye ve Hedef
+                            Ayarları</div>
                         <div class="form-group">
-                            <label for="archiveName">Günlük / Arşiv İsmi</label>
+                            <label for="archiveName" data-i18n="archive_name_label">Günlük / Arşiv İsmi</label>
                             <input type="text" id="archiveName" value="RUNNER TRADER JOURNAL" maxlength="50" required>
-                            <small>Rapor başlıklarında ve dosya isminde kullanılacak isim.</small>
+                            <small data-i18n="archive_name_help">Rapor başlıklarında ve dosya isminde kullanılacak
+                                isim.</small>
                         </div>
                         <div class="form-group">
-                            <label for="initialCapital">Başlangıç Sermayesi (₺)</label>
+                            <label for="initialCapital" data-i18n="initial_capital_label">Başlangıç Sermayesi
+                                (₺)</label>
                             <input type="number" id="initialCapital" value="50000" min="0" step="0.01" required>
-                            <small>Hesabınızın şu anki mevcut bakiyesi</small>
+                            <small data-i18n="initial_capital_help">Hesabınızın şu anki mevcut bakiyesi</small>
                         </div>
 
                         <div class="form-group" id="targetBaseGroup">
-                            <label for="targetBaseCapital">Hedef Baz Sermayesi (₺)</label>
+                            <label for="targetBaseCapital" data-i18n="target_base_label">Hedef Baz Sermayesi (₺)</label>
                             <input type="number" id="targetBaseCapital" value="50000" min="0" step="0.01" required>
-                            <small>Hedefin hesaplandığı ana para (Kâr bu tutar üzerinden hesaplanır)</small>
+                            <small data-i18n="target_base_help">Hedefin hesaplandığı ana para (Kâr bu tutar üzerinden
+                                hesaplanır)</small>
                         </div>
 
                         <div class="form-group" id="targetGrowthGroup">
-                            <label for="targetGrowth">Hedef Büyüme Oranı (%)</label>
+                            <label for="targetGrowth" data-i18n="target_growth_label">Hedef Büyüme Oranı (%)</label>
                             <input type="number" id="targetGrowth" value="8" min="1" max="1000" step="0.5" required>
-                            <small>Challenge modunda ulaşmak istediğiniz toplam kâr yüzdesi</small>
+                            <small data-i18n="target_growth_help">Challenge modunda ulaşmak istediğiniz toplam kâr
+                                yüzdesi</small>
                         </div>
                     </div>
 
                     <!-- Section 3: Risk Management -->
                     <div class="settings-section" id="riskManagementSection">
-                        <div class="settings-section-title">🛡️ Risk ve Strateji Yönetimi</div>
+                        <div class="settings-section-title" data-i18n="risk_settings_title">🛡️ Risk ve Strateji
+                            Yönetimi</div>
                         <div class="form-group" id="riskGroup">
-                            <label for="riskPerTrade">İşlem Başına Maksimum Risk (%)</label>
+                            <label for="riskPerTrade" data-i18n="risk_per_trade_label">İşlem Başına Maksimum Risk
+                                (%)</label>
                             <input type="number" id="riskPerTrade" value="0.5" min="0.1" max="5" step="0.1" required>
-                            <small>Her işlemde kasanızın yüzde kaçını riske atacaksınız?</small>
+                            <small data-i18n="risk_per_trade_help">Her işlemde kasanızın yüzde kaçını riske
+                                atacaksınız?</small>
                         </div>
 
                         <div class="form-group" id="rGroup">
-                            <label for="rLevel">Kâr Kilitleme R Seviyesi</label>
+                            <label for="rLevel" data-i18n="r_level_label">Kâr Kilitleme R Seviyesi</label>
                             <input type="number" id="rLevel" value="1.2" min="0.5" max="5" step="0.1" required>
-                            <small>İşlem bu R seviyesine ulaştığında kârın bir kısmı kilitlenir.</small>
+                            <small data-i18n="r_level_help">İşlem bu R seviyesine ulaştığında kârın bir kısmı
+                                kilitlenir.</small>
                         </div>
 
                         <div class="form-group" id="lockGroup">
-                            <label for="lockPercentage">Kilitlenen Pozisyon Yüzdesi (%)</label>
+                            <label for="lockPercentage" data-i18n="lock_percent_label">Kilitlenen Pozisyon Yüzdesi
+                                (%)</label>
                             <input type="number" id="lockPercentage" value="70" min="50" max="90" step="5" required>
-                            <small>Kâr kilitlendiğinde pozisyonun yüzde kaçı kapatılacak?</small>
+                            <small data-i18n="lock_percent_help">Kâr kilitlendiğinde pozisyonun yüzde kaçı
+                                kapatılacak?</small>
                         </div>
                     </div>
 
-                    <!-- Section 4: Manual Mode -->
+                    <!-- Section 4: Manual Mode & Language -->
                     <div class="settings-section">
-                        <div class="settings-section-title">⚙️ Ek Özellikler</div>
+                        <div class="settings-section-title" data-i18n="extra_settings_title">⚙️ Ek Özellikler / Language
+                        </div>
                         <div class="form-group" id="manualModeGroup">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="manualMode">
-                                <span>Manuel Giriş Modu</span>
+                                <span data-i18n="manual_mode_label">Manuel Giriş Modu</span>
                             </label>
-                            <small>Kazanç miktarlarını Runner sisteminin otomatik hesaplaması yerine manuel girmek için
+                            <small data-i18n="manual_mode_help">Kazanç miktarlarını Runner sisteminin otomatik
+                                hesaplaması yerine manuel girmek için
                                 kullanın.</small>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <div class="form-group">
+                                <label for="appLanguage" data-i18n="language_label">Dil / Language</label>
+                                <select id="appLanguage">
+                                    <option value="tr">Türkçe 🇹🇷</option>
+                                    <option value="en">English 🇺🇸</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="appCurrency" data-i18n="currency_label">Para Birimi / Currency</label>
+                                <select id="appCurrency">
+                                    <option value="TRY">Türk Lirası (₺)</option>
+                                    <option value="USD">US Dollar ($)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Section 5: Account Closure -->
                     <div class="settings-section">
-                        <div class="settings-section-title">📂 Hesabı Kapat ve Arşivle</div>
-                        <p
+                        <div class="settings-section-title" data-i18n="close_account_title">📂 Hesabı Kapat ve Arşivle
+                        </div>
+                        <p data-i18n="close_account_desc"
                             style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">
                             Mevcut challenge veya serbest dönemi sonlandırın. Tüm işlem geçmişiniz profesyonel formatta
                             <b>PDF ve Excel</b> olarak dışa aktarılır, ardından hesabınız yeni bir dönem için
@@ -492,14 +558,16 @@
                         </p>
                         <button type="button" class="btn-primary" id="closeAccountBtn"
                             style="background: linear-gradient(135deg, #f85149, #b91c1c); border: none; width: 100%; padding: 12px; font-weight: bold; border-radius: 8px;">
-                            🏆 Hesabı Kapat ve Verileri İndir
+                            <span data-i18n="close_account_btn">🏆 Hesabı Kapat ve Verileri İndir</span>
                         </button>
                     </div>
 
                     <div class="form-actions">
-                        <button type="button" class="btn-secondary" id="resetSettings">Varsayılana Dön</button>
-                        <button type="button" class="btn-danger" id="clearAllData">Tüm Verileri Sıfırla</button>
-                        <button type="submit" class="btn-primary">Kaydet</button>
+                        <button type="button" class="btn-secondary" id="resetSettings" data-i18n="reset">Varsayılana
+                            Dön</button>
+                        <button type="button" class="btn-danger" id="clearAllData" data-i18n="reset_all_data">Tüm
+                            Verileri Sıfırla</button>
+                        <button type="submit" class="btn-primary" data-i18n="save">Kaydet</button>
                     </div>
                 </form>
             </div>
@@ -511,7 +579,7 @@
         <div class="modal-overlay" id="calcModalOverlay"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>🧮 Kâr Hesaplayıcı</h3>
+                <h3 data-i18n="calc_modal_title">🧮 Kâr Hesaplayıcı</h3>
                 <button class="modal-close" id="calcModalClose">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 6L6 18M6 6l12 12"></path>
@@ -521,47 +589,51 @@
 
             <div class="settings-form">
                 <div class="form-group">
-                    <label for="calcRiskAmount">Risk Miktarı (TL)</label>
+                    <label for="calcRiskAmount" data-i18n="calc_risk_label">Risk Miktarı (TL)</label>
                     <input type="number" id="calcRiskAmount" placeholder="Örn: 250">
-                    <small>İşlem başına riske edilen tutar</small>
+                    <small data-i18n="calc_risk_help">İşlem başına riske edilen tutar</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="calcRRR">Hedef RRR</label>
+                    <label for="calcRRR" data-i18n="calc_rrr_label">Hedef RRR</label>
                     <input type="number" id="calcRRR" placeholder="Örn: 2.5" step="0.1">
-                    <small>Kâr almayı planladığınız R seviyesi</small>
+                    <small data-i18n="calc_rrr_help">Kâr almayı planladığınız R seviyesi</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="calcPercent">Kapanış Yüzdesi (%)</label>
+                    <label for="calcPercent" data-i18n="calc_percent_label">Kapanış Yüzdesi (%)</label>
                     <input type="number" id="calcPercent" placeholder="Örn: 90" max="100">
-                    <small>Bu seviyede kapatılacak pozisyon oranı</small>
+                    <small data-i18n="calc_percent_help">Bu seviyede kapatılacak pozisyon oranı</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="calcLotSize">Mevcut Lot Miktarı</label>
+                    <label for="calcLotSize" data-i18n="calc_lot_label">Mevcut Lot Miktarı</label>
                     <input type="number" id="calcLotSize" placeholder="Örn: 0.5" step="0.01">
-                    <small>Elinizdeki toplam lot miktarı</small>
+                    <small data-i18n="calc_lot_help">Elinizdeki toplam lot miktarı</small>
                 </div>
 
                 <div class="calc-result-box">
-                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px;">Tahmini Kâr
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px;"
+                        data-i18n="calc_estimate_label">Tahmini Kâr
                     </div>
                     <div class="calc-result-value" id="calcResult">0 ₺</div>
                 </div>
 
                 <div class="calc-result-box" id="lotResultBox"
                     style="display: none; margin-top: 12px; background: rgba(59, 130, 246, 0.1); border-color: var(--accent-primary);">
-                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px;">MT5 Mobil İçin
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px;"
+                        data-i18n="calc_mt5_label">MT5 Mobil İçin
                     </div>
                     <div class="calc-result-value" id="lotResult" style="color: var(--accent-primary);">0.00 lot
                     </div>
-                    <small style="margin-top: 8px; display: block; color: var(--text-secondary);">Bu RR seviyesinde
+                    <small style="margin-top: 8px; display: block; color: var(--text-secondary);"
+                        data-i18n="calc_mt5_help">Bu RR seviyesinde
                         kapatılacak lot miktarı</small>
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="btn-primary" id="calculateBtn" style="width: 100%">Hesapla</button>
+                    <button type="button" class="btn-primary" id="calculateBtn" style="width: 100%"
+                        data-i18n="calculate">Hesapla</button>
                 </div>
             </div>
         </div>
