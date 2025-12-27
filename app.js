@@ -23,6 +23,7 @@ class TradingSystem {
         this.itemsPerPage = 5;
         this.chart = null;
         this.currentCalendarDate = new Date(); // Kâr/Zarar takvimi tarihi
+        this.currentChartPeriod = '1m'; // Default period filter
 
         // Initialize Core Systems
         // Check for shared URL data
@@ -139,6 +140,13 @@ class TradingSystem {
             be_shield_msg: "Risk Yönetimi Mükemmel. Ancak Runner potansiyelinizi artırmalısınız. Daha geniş zaman dilimlerinde veya ana trend yönünde işlem aramayı deneyin.",
             super_runner_msg: "HARİKA! Bu koşucu kaybın maliyetini tek başına çıkardı. Hedefinize büyük bir adım attınız!",
             target_growth_msg: "TEBRİKLER! Büyüme Hedefinize Ulaştınız. Yeni hedefinizi belirleyin veya kârınızı çekin.",
+            trade_item_label: "{count}. İşlem",
+            select_option: "Seçiniz...",
+            long_option: "Long (+)",
+            short_option: "Short (-)",
+            loss_sl: "Stop Loss (-)",
+            be_emoji: "Break Even (0)",
+            win_emoji: "Take Profit (+)",
             copy_success: "Kopyalandı!",
             share_title: "📈 Profil Paylaşımı",
             share_heading: "İstatistiklerini Paylaş",
@@ -158,7 +166,7 @@ class TradingSystem {
             trades_count: "{count} işlem",
             runner_performance: "RUNNER PERFORMANS",
             r_based_journal: "R-Tabanlı İşlem Günlüğü",
-            performance_analysis: "PERFORMANS ANALİZİ",
+            performance_analysis: "PERFORMANCE ANALYSIS",
             new_trade_entry: "YENİ İŞLEM KAYDI",
             trade_history: "İŞLEM GEÇMİŞİ",
             select_option: "Seçiniz...",
@@ -192,9 +200,9 @@ class TradingSystem {
             trade_pair_placeholder: "Örn: USDJPY",
             manual_loss_placeholder: "Örn: -500",
             chart_link_placeholder: "https://www.tradingview.com/x/...",
-            rrr_placeholder: "R Seviyesi (Örn: 2.5)",
-            percent_placeholder: "Kapanan % (Örn: 25)",
-            profit_placeholder: "Elde Edilen Kâr ({symbol})",
+            rrr_placeholder: "R",
+            percent_placeholder: "%",
+            profit_placeholder: "Kar ({symbol})",
             total_tp_percent: "Toplam Yüzde",
             trade_item_label: "İşlem {count}",
             balance_text: "Bakiye",
@@ -369,7 +377,7 @@ class TradingSystem {
             consecutive_loss_msg: "consecutive losses recorded. Drawdown periods are natural in the Runner Model. Wait for your high-probability setup without breaking your risk rules. Patience is key.",
             be_shield_msg: "Excellent Risk Management. However, you should aim to increase your Runner potential. Try looking for trades in higher timeframes or main trend direction.",
             super_runner_msg: "AMAZING! This {maxRRR}R runner single-handedly covered the cost of {lossesCompensated} previous losses. A huge step towards your target! (+{profitLoss})",
-            target_growth_msg: "CONGRATULATIONS! You reached your {targetGrowth}% Growth Target. Set a new target or withdraw your profits. ({netProfit})",
+            target_growth_msg: "CONGRATS! You have reached your growth target. Set a new target or withdraw your profit.",
             copy_success: "Copied!",
             share_title: "📈 Profile Sharing",
             share_heading: "Share Your Stats",
@@ -415,9 +423,9 @@ class TradingSystem {
             trade_pair_placeholder: "e.g. USDJPY",
             manual_loss_placeholder: "e.g. -500",
             chart_link_placeholder: "https://www.tradingview.com/x/...",
-            rrr_placeholder: "R Level (e.g. 2.5)",
-            percent_placeholder: "Close % (e.g. 25)",
-            profit_placeholder: "Profit Realized ({symbol})",
+            rrr_placeholder: "R",
+            percent_placeholder: "%",
+            profit_placeholder: "Profit ({symbol})",
             total_tp_percent: "Total Percent",
             trade_item_label: "Trade {count}",
             balance_text: "Balance",
@@ -540,56 +548,98 @@ class TradingSystem {
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 el.placeholder = text;
             } else if (el.tagName === 'OPTION') {
-                // For option elements, preserve the value attribute
                 el.textContent = text;
             } else {
                 el.textContent = text;
             }
         });
 
-        // Update logo and titles
-        const logoTitle = document.querySelector('.logo-text h1');
-        if (logoTitle) logoTitle.textContent = this.t('runner_performance');
-        const logoSub = document.querySelector('.logo-text p');
-        if (logoSub) logoSub.textContent = this.t('r_based_journal');
-
-        // Read-only banner
-        const banner = document.getElementById('readOnlyBanner');
-        if (banner) {
-            const span = banner.querySelector('span');
-            if (span) span.textContent = this.t('shared_profile_msg');
-            const a = banner.querySelector('a');
-            if (a) a.textContent = this.t('start_own_tracker');
+        // 2. Tab Navigation Translations
+        const tabs = document.querySelectorAll('.tab-item');
+        if (tabs.length >= 4) {
+            tabs[0].textContent = isEN ? 'Dashboard' : 'Panel';
+            tabs[1].textContent = isEN ? 'Journal' : 'Günlük';
+            tabs[2].textContent = isEN ? 'Calendar' : 'Takvim';
+            tabs[3].textContent = isEN ? 'Tools' : 'Araçlar';
         }
 
-        // Settings / Share / Profile buttons
-        const settingsBtn = document.getElementById('settingsBtn');
-        if (settingsBtn) {
-            const nodes = settingsBtn.childNodes;
-            nodes[nodes.length - 1].textContent = ' ' + this.t('settings');
-        }
+        // 3. Section Headers (More robust selection)
+        const headers = {
+            '#heroSection .hero-label': isEN ? 'Total Balance' : 'Toplam Bakiye',
+            '.analytics-section .section-header h2': this.t('performance_analysis'),
+            '.entry-section .section-header h2': '➕ ' + (isEN ? 'NEW TRADE' : 'YENİ İŞLEM'),
+            '#tradeCalendarSection h2': '📅 ' + (isEN ? 'CALENDAR' : 'TAKVİM VE İSTATİSTİKLER'),
+            '#tradeHistorySection h2': '📜 ' + (isEN ? 'HISTORY' : 'TÜM İŞLEMLER'),
+            '#clearHistoryBtn': isEN ? 'Clear History' : 'Geçmişi Temizle',
+            '#openCalcBtn': '🧮 ' + (isEN ? 'Calculator' : 'Hesaplayıcı'),
+            '#submitTradeBtn span': isEN ? 'Save Trade' : 'İşlemi Kaydet'
+        };
 
-        const shareBtn = document.getElementById('shareBtn');
-        if (shareBtn) {
-            const nodes = shareBtn.childNodes;
-            nodes[nodes.length - 1].textContent = ' ' + this.t('share_challenge').split(' ')[1] || ' Share';
-        }
+        Object.keys(headers).forEach(selector => {
+            const el = document.querySelector(selector);
+            if (el) el.textContent = headers[selector];
+        });
 
-        // Section Headers
-        const targetH2 = document.querySelector('.target-section .section-header h2');
-        if (targetH2) targetH2.textContent = `🎯 ${this.t('account_mode').toUpperCase()}`;
+        // Metrics Labels
+        const metrics = {
+            'pnl': isEN ? 'Net P&L' : 'Net P&L',
+            'target': isEN ? 'Target' : 'Hedef',
+            'remaining': isEN ? 'Remaining' : 'Kalan',
+            'completion': isEN ? 'Completion' : 'Tamamlanma'
+        };
+        document.querySelectorAll('.analytic-card').forEach(card => {
+            const label = card.querySelector('.card-label');
+            const icon = card.querySelector('.card-icon');
+            if (label && icon) {
+                if (icon.classList.contains('pnl')) label.textContent = metrics.pnl;
+                if (icon.classList.contains('target')) label.textContent = metrics.target;
+                if (icon.classList.contains('remaining')) label.textContent = metrics.remaining;
+                if (icon.classList.contains('completion')) label.textContent = metrics.completion;
+            }
+        });
 
-        const entryH2 = document.querySelector('.entry-section .section-header h2');
-        if (entryH2) entryH2.textContent = `➕ ${this.t('new_trade_entry')}`;
+        // Dashboard specific labels
+        const compLabel = document.querySelector('.completion-label');
+        if (compLabel) compLabel.textContent = isEN ? 'Completion Rate' : 'Tamamlanma Oranı';
 
-        const chartH2 = document.querySelector('.chart-section h2');
-        if (chartH2) chartH2.textContent = `📊 ${this.t('balance_history')}`;
+        const chartTitle = document.querySelector('.chart-section-large h2');
+        if (chartTitle) chartTitle.innerHTML = `<span style="font-size: 1.2rem;">📈</span> ` + (isEN ? 'BALANCE PROGRESSION' : 'BAKİYE İLERLEYİŞİ');
 
-        const historyH2 = document.querySelector('.history-section .section-header h2');
-        if (historyH2) historyH2.textContent = `📜 ${this.t('trade_history')}`;
+        const profileWelcome = document.querySelector('.welcome-text');
+        if (profileWelcome) profileWelcome.textContent = isEN ? 'Welcome,' : 'Hoş geldin,';
 
-        const metricsH2 = document.querySelector('.metrics-section .section-header h2');
-        if (metricsH2) metricsH2.textContent = `📈 ${this.t('performance_analysis')}`;
+        // Calculator placeholders and labels
+        const calcLabels = {
+            'calcRiskLabel': isEN ? `Risk Amount (${symbol})` : `Risk Miktarı (${symbol})`,
+            'calcRiskHelp': isEN ? 'Amount risked per trade' : 'İşlem başına riske edilen tutar',
+            'calcRRRLabel': isEN ? 'Target RRR' : 'Hedef RRR',
+            'calcRRRHelp': isEN ? 'R level where you plan to take profit' : 'Kâr almayı planladığınız R seviyesi',
+            'calcPercLabel': isEN ? 'Close %' : 'Kapanış %',
+            'calcPercHelp': isEN ? 'Position ratio to be closed at this level' : 'Bu seviyede kapatılacak pozisyon oranı',
+            'calcLotLabel': isEN ? 'Lot Size (Optional)' : 'Lot Büyüklüğü (İsteğe bağlı)',
+            'calcLotHelp': isEN ? 'Total lot size in your hand' : 'Elinizdeki toplam lot miktarı',
+            'calcEstimateLabel': isEN ? 'Estimated Profit' : 'Tahmini Kâr',
+            'calcMt5Label': isEN ? 'For MT5 Mobile' : 'MT5 Mobil İçin',
+            'calcMt5Help': isEN ? 'Lot size to be closed at this RR level' : 'Bu RR seviyesinde kapatılacak lot miktarı',
+            'calculateBtn': isEN ? 'CALCULATE' : 'HESAPLA'
+        };
+
+        Object.keys(calcLabels).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = calcLabels[id];
+        });
+
+        // Update modal titles
+        const modalTitles = {
+            'settingsModalTitle': isEN ? '⚙️ System Settings' : '⚙️ Sistem Ayarları',
+            'calcModalTitle': isEN ? '🧮 Profit Calculator' : '🧮 Hesap Makinesi',
+            'shareModalTitle': isEN ? '🔗 Share Profile' : '🔗 Profili Paylaş'
+        };
+
+        Object.keys(modalTitles).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = modalTitles[id];
+        });
 
         // Metric Card Labels
         const metricLabels = document.querySelectorAll('.metric-label');
@@ -614,14 +664,6 @@ class TradingSystem {
         const labelDir = document.querySelector('label[for="tradeDirection"]');
         if (labelDir) labelDir.textContent = this.t('direction');
 
-        // Select Options
-        const dirSelect = document.getElementById('tradeDirection');
-        if (dirSelect) {
-            dirSelect.options[0].textContent = this.t('select_option');
-            dirSelect.options[1].textContent = this.t('long_option');
-            dirSelect.options[2].textContent = this.t('short_option');
-        }
-
         const labelChart = document.querySelector('label[for="chartUrl"]');
         if (labelChart) labelChart.textContent = this.t('chart_url');
         const inputChart = document.getElementById('chartUrl');
@@ -629,13 +671,6 @@ class TradingSystem {
 
         const labelResult = document.querySelector('label[for="tradeResult"]');
         if (labelResult) labelResult.textContent = this.t('trade_result');
-        const resSelect = document.getElementById('tradeResult');
-        if (resSelect) {
-            resSelect.options[0].textContent = this.t('select_option');
-            resSelect.options[1].textContent = this.t('loss_sl');
-            resSelect.options[2].textContent = this.t('be_emoji');
-            resSelect.options[3].textContent = this.t('win_emoji');
-        }
 
         const labelLoss = document.querySelector('label[for="manualLossAmount"]');
         if (labelLoss) labelLoss.textContent = this.t('manual_loss_label', { symbol: symbol });
@@ -724,14 +759,21 @@ class TradingSystem {
         if (labels.length > 0) {
             // This is a bit fragile but better than nothing
             labels.forEach(l => {
-                if (l.htmlFor === 'archiveName') l.textContent = this.t('archive_name') || 'Profile Name';
-                if (l.htmlFor === 'initialCapital') l.textContent = this.t('initial_capital');
-                if (l.htmlFor === 'targetGrowth') l.textContent = this.t('target_growth_rate');
-                if (l.htmlFor === 'riskPerTrade') l.textContent = this.t('risk_per_trade');
-                if (l.htmlFor === 'rLevel') l.textContent = this.t('lock_rrr_label') || 'R Level';
-                if (l.htmlFor === 'lockPercentage') l.textContent = this.t('lock_percent_label') || 'Lock %';
-                if (l.htmlFor === 'appLanguage') l.textContent = isEN ? 'Language' : 'Dil';
-                if (l.htmlFor === 'appCurrency') l.textContent = isEN ? 'Currency' : 'Para Birimi';
+                if (l.getAttribute('data-i18n')) {
+                    const key = l.getAttribute('data-i18n');
+                    l.textContent = this.t(key, { symbol: symbol });
+                } else {
+                    // Fallback for hardcoded htmlFor checks
+                    if (l.htmlFor === 'archiveName') l.textContent = this.t('archive_name_label');
+                    if (l.htmlFor === 'initialCapital') l.textContent = this.t('initial_capital_label', { symbol: symbol });
+                    if (l.htmlFor === 'targetBaseCapital') l.textContent = this.t('target_base_label', { symbol: symbol });
+                    if (l.htmlFor === 'targetGrowth') l.textContent = this.t('target_growth_label');
+                    if (l.htmlFor === 'riskPerTrade') l.textContent = this.t('risk_per_trade_label');
+                    if (l.htmlFor === 'rLevel') l.textContent = this.t('r_level_label');
+                    if (l.htmlFor === 'lockPercentage') l.textContent = this.t('lock_percent_label');
+                    if (l.htmlFor === 'appLanguage') l.textContent = this.t('language_label');
+                    if (l.htmlFor === 'appCurrency') l.textContent = this.t('currency_label');
+                }
             });
         }
         const resetSetsBtn = document.getElementById('resetSettings');
@@ -874,20 +916,26 @@ class TradingSystem {
 
     renderProfileList() {
         const profileList = document.getElementById('profileList');
-        const activeNameSpan = document.getElementById('activeProfileName');
+        const activeNameSpan = document.getElementById('activeProfileNameDetail');
         if (!profileList) return;
 
-        activeNameSpan.textContent = this.getActiveProfileName();
+        if (activeNameSpan) activeNameSpan.textContent = this.getActiveProfileName();
         profileList.innerHTML = '';
 
         this.profiles.forEach(p => {
             const item = document.createElement('div');
             item.className = `profile-item ${p.id === this.activeProfileId ? 'active' : ''}`;
-            item.onclick = () => this.switchProfile(p.id);
+
+            // Disable switching in read-only mode
+            if (!this.isReadOnly) {
+                item.onclick = () => this.switchProfile(p.id);
+            } else {
+                item.style.cursor = 'default';
+            }
 
             item.innerHTML = `
                 <span class="profile-item-name">📁 ${p.name}</span>
-                ${p.id !== 'default' ? `
+                ${(p.id !== 'default' && !this.isReadOnly) ? `
                     <button class="delete-profile-btn" onclick="tradingSystem.deleteProfile('${p.id}', event)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <polyline points="3 6 5 6 21 6"></polyline>
@@ -905,10 +953,17 @@ class TradingSystem {
         this.updateStaticTranslations();
         this.initChart();
         this.updateDashboard();
+        this.renderRecentActivity(); // New: Recent trades list
         this.renderTradeHistory();
         this.renderProfileList();
-        this.renderTradeCalendar(); // Takvimi güncelle
-        this.renderPairStats(); // Parite istatistiklerini güncelle
+        this.renderTradeCalendar();
+        this.renderPairStats();
+
+        // Ensure trade entry form state matches current selection
+        const tradeRes = document.getElementById('tradeResult');
+        if (tradeRes) {
+            this.toggleTradeInputs(tradeRes.value);
+        }
     }
 
     checkSharedUrl() {
@@ -986,13 +1041,31 @@ class TradingSystem {
                     this.isReadOnly = true;
                     this.recalculateBalances();
                     const banner = document.getElementById('readOnlyBanner');
-                    if (banner) banner.style.display = 'block';
+                    if (banner) banner.style.display = 'flex';
                     const style = document.createElement('style');
-                    style.innerHTML = `.entry-section, .header-actions, #clearHistoryBtn, .delete-trade-btn, #openCalcBtn { display: none !important; }`;
+                    style.innerHTML = `
+                        .entry-section, 
+                        #shareBtn, 
+                        #settingsBtn, 
+                        #clearHistoryBtn, 
+                        .delete-trade-btn, 
+                        .delete-icon-btn, 
+                        #openCalcBtn, 
+                        #addProfileBtn, 
+                        .delete-profile-btn, 
+                        #fabAddBtn,
+                        [data-tab="tools"],
+                        #navStats,
+                        #navJournal,
+                        #navSettings { display: none !important; }
+                        .user-profile { cursor: default !important; pointer-events: none !important; }
+                    `;
                     document.head.appendChild(style);
 
                     const profileName = s.n || urlParams.get('profile') || 'Shared Profile';
                     document.title = `${profileName} | Runner Tracker`;
+                    const nameEl = document.getElementById('activeProfileNameDetail');
+                    if (nameEl) nameEl.textContent = profileName;
                 }
                 // Handle Version 1 (Compact Keys Format)
                 else if (data.s && data.t) {
@@ -1022,14 +1095,32 @@ class TradingSystem {
                     this.isReadOnly = true;
                     this.recalculateBalances();
                     const banner = document.getElementById('readOnlyBanner');
-                    if (banner) banner.style.display = 'block';
+                    if (banner) banner.style.display = 'flex';
                     const style = document.createElement('style');
-                    style.innerHTML = `.entry-section, .header-actions, #clearHistoryBtn, .delete-trade-btn, #openCalcBtn { display: none !important; }`;
+                    style.innerHTML = `
+                        .entry-section, 
+                        #shareBtn, 
+                        #settingsBtn, 
+                        #clearHistoryBtn, 
+                        .delete-trade-btn, 
+                        .delete-icon-btn, 
+                        #openCalcBtn, 
+                        #addProfileBtn, 
+                        .delete-profile-btn, 
+                        #fabAddBtn,
+                        [data-tab="tools"],
+                        #navStats,
+                        #navJournal,
+                        #navSettings { display: none !important; }
+                        .user-profile { cursor: default !important; pointer-events: none !important; }
+                    `;
                     document.head.appendChild(style);
 
                     // Set title with profile name
                     const profileName = s.n || urlParams.get('profile') || 'Shared Profile';
                     document.title = `${profileName} | Runner Tracker`;
+                    const nameEl = document.getElementById('activeProfileNameDetail');
+                    if (nameEl) nameEl.textContent = profileName;
                 }
                 // Legacy Format
                 else if (data.trades && data.settings) {
@@ -1354,7 +1445,6 @@ class TradingSystem {
         } else {
             document.documentElement.removeAttribute('data-theme');
         }
-
         localStorage.setItem('theme', newTheme);
     }
 
@@ -1362,7 +1452,7 @@ class TradingSystem {
     // CHART SYSTEM
     // ===================================
     initChart() {
-        const canvas = document.getElementById('balanceChart');
+        const canvas = document.getElementById('balanceChartLarge');
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
@@ -1373,56 +1463,100 @@ class TradingSystem {
         }
 
         // Chart.js Configuration
-        Chart.defaults.color = '#8b949e';
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const accentColor = isDark ? '#00ff88' : '#10b981';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+        const textColor = isDark ? '#8b949e' : '#64748b';
+
+        Chart.defaults.color = textColor;
         Chart.defaults.font.family = "'Inter', sans-serif";
 
         this.chart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [],
-                datasets: [{
-                    label: 'Bakiye',
-                    data: [],
-                    borderColor: '#58a6ff',
-                    backgroundColor: 'rgba(88, 166, 255, 0.1)',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#58a6ff',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#58a6ff',
-                    fill: true,
-                    tension: 0.4
-                }]
+                datasets: [
+                    {
+                        label: 'Bakiye',
+                        data: [],
+                        borderColor: accentColor,
+                        backgroundColor: (context) => {
+                            const chart = context.chart;
+                            const { ctx, chartArea } = chart;
+                            if (!chartArea) return null;
+                            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                            gradient.addColorStop(0, isDark ? 'rgba(0, 255, 136, 0.2)' : 'rgba(16, 185, 129, 0.2)');
+                            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                            return gradient;
+                        },
+                        borderWidth: 3,
+                        pointBackgroundColor: accentColor,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: accentColor,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.4,
+                        order: 2
+                    },
+                    {
+                        label: 'Hedef',
+                        data: [],
+                        borderColor: isDark ? 'rgba(168, 85, 247, 0.5)' : 'rgba(124, 58, 237, 0.5)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0,
+                        order: 1
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                            boxWidth: 12,
+                            boxHeight: 12,
+                            usePointStyle: true,
+                            font: { size: 11, weight: 'bold' }
+                        }
+                    },
                     tooltip: {
                         mode: 'index',
                         intersect: false,
-                        backgroundColor: '#161b22',
-                        titleColor: '#e6edf3',
-                        bodyColor: '#8b949e',
-                        borderColor: '#30363d',
+                        backgroundColor: isDark ? '#0f141c' : '#ffffff',
+                        titleColor: isDark ? '#e6edf3' : '#0f172a',
+                        bodyColor: textColor,
+                        borderColor: gridColor,
                         borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 12,
                         callbacks: {
                             label: (context) => {
-                                return `Bakiye: ${this.formatCurrency(context.parsed.y)}`;
+                                const label = context.dataset.label;
+                                return `${label}: ${this.formatCurrency(context.parsed.y)}`;
                             }
                         }
                     }
                 },
                 scales: {
                     y: {
-                        grid: { color: '#30363d' },
+                        grid: { color: gridColor },
+                        border: { display: false },
                         ticks: {
                             callback: (value) => this.formatCurrency(value)
                         }
                     },
                     x: {
-                        grid: { display: false }
+                        grid: { display: false },
+                        border: { display: false }
                     }
                 },
                 interaction: {
@@ -1447,10 +1581,16 @@ class TradingSystem {
         this.chart.data.datasets[0].label = this.t('balance_text');
         this.chart.data.datasets[0].data = data;
 
-        // Update tooltips if needed
-        this.chart.options.plugins.tooltip.callbacks.label = (context) => {
-            return `${this.t('balance_text')}: ${this.formatCurrency(context.parsed.y)}`;
-        };
+        // Challenge Mode Target Line
+        if (this.settings.accountMode === 'challenge') {
+            const targetBalance = this.getTargetProfit();
+            const targetData = new Array(labels.length).fill(targetBalance);
+            this.chart.data.datasets[1].data = targetData;
+            this.chart.data.datasets[1].hidden = false;
+        } else {
+            this.chart.data.datasets[1].data = [];
+            this.chart.data.datasets[1].hidden = true;
+        }
 
         this.chart.update();
     }
@@ -1594,13 +1734,8 @@ class TradingSystem {
 
     // Calculate Net Profit
     getNetProfit() {
-        const tradeProfit = this.trades.reduce((sum, trade) => sum + trade.profitLoss, 0);
-
-        // Add difference between Start Balance (Initial) and Base Capital (Original Start)
-        // If I start at 50,200 but Base is 50,000, I am already +200 profit relative to base.
-        const capitalDiff = this.settings.initialCapital - (this.settings.targetBaseCapital || this.settings.initialCapital);
-
-        return tradeProfit + capitalDiff;
+        // Simply sum all trade profits/losses
+        return this.trades.reduce((sum, trade) => sum + trade.profitLoss, 0);
     }
 
     // Calculate Win Rate
@@ -1897,234 +2032,305 @@ class TradingSystem {
     // UI UPDATES
     // ===================================
 
-    updateDashboard() {
-        const isFreeMode = (this.settings.accountMode === 'free');
 
-        // Labels & Upper Cards
-        const card1 = document.querySelector('.target-card.primary');
-        const card2 = document.querySelector('.target-card.success');
-        const card3 = document.querySelector('.target-card.warning');
-        const targetGrid = document.querySelector('.target-grid');
+    getWinRate() {
+        if (this.trades.length === 0) return 0;
+        const wins = this.trades.filter(t => t.result === 'win').length;
+        return (wins / this.trades.length) * 100;
+    }
 
-        if (isFreeMode) {
-            // FREE MODE - Simplified View
-            document.getElementById('targetBadge').textContent = this.t('free_mode');
-
-            // Hide other cards, show only relevant info
-            if (card1) card1.style.display = 'none';
-            if (card3) card3.style.display = 'none';
-
-            // Adjust Grid to single column centered
-            if (targetGrid) {
-                targetGrid.style.gridTemplateColumns = '1fr';
-                targetGrid.style.maxWidth = '400px';
-                targetGrid.style.margin = '0 auto 2rem auto';
+    getAvgRRR() {
+        const winningTrades = this.trades.filter(t => t.result === 'win');
+        if (winningTrades.length === 0) return 0;
+        let totalR = 0;
+        winningTrades.forEach(t => {
+            let r = 0;
+            if (t.breakdown && t.breakdown.runnerCloseRRR) {
+                r = parseFloat(t.breakdown.runnerCloseRRR);
+            } else if (t.rMultiples) {
+                r = parseFloat(t.rMultiples);
             }
+            if (!isNaN(r)) totalR += r;
+        });
+        return (totalR / winningTrades.length).toFixed(2);
+    }
 
-            // Card 2: Growth Focus
-            if (card2) {
-                card2.style.display = 'flex';
-                // Change label to differentiate
-                document.getElementById('currentProfit').previousElementSibling.textContent = this.t('net_growth');
-                // Update value
-                document.getElementById('currentProfit').textContent = this.formatCurrency(this.getNetProfit());
-                // Update sublabel
-                const progress = this.settings.initialCapital > 0
-                    ? (this.getNetProfit() / this.settings.initialCapital) * 100
-                    : 0;
-                document.getElementById('profitChange').textContent = this.t('target_growth_percentage', { progress: progress.toFixed(2) });
-                document.getElementById('profitChange').className = progress >= 0 ? 'card-sublabel text-success' : 'card-sublabel text-danger';
-            }
+    getMaxDrawdown() {
+        if (this.trades.length === 0) return 0;
+        const balances = [];
+        let runningBalance = this.settings.initialCapital;
+        balances.push(runningBalance);
+        const sortedTrades = [...this.trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        sortedTrades.forEach(t => {
+            runningBalance += t.profitLoss;
+            balances.push(runningBalance);
+        });
+        let peak = balances[0];
+        let maxDrawdown = 0;
+        balances.forEach(balance => {
+            if (balance > peak) peak = balance;
+            const drawdown = (peak - balance) / peak * 100;
+            if (drawdown > maxDrawdown) maxDrawdown = drawdown;
+        });
+        return -maxDrawdown;
+    }
 
-            document.getElementById('progressLabel').textContent = this.t('growth_progress');
+    getTargetProfit() {
+        // Target is initial capital + (initial capital × target growth %)
+        // For example: 50,000 + (50,000 × 0.08) = 54,000
+        const targetAmount = this.settings.initialCapital * (1 + this.settings.targetGrowth / 100);
+        return targetAmount;
+    }
 
-        } else {
-            // CHALLENGE MODE - Restore Standard View
-            if (card1) card1.style.display = 'flex';
-            if (card3) card3.style.display = 'flex';
-            if (card2) {
-                card2.style.display = 'flex';
-                document.getElementById('currentProfit').previousElementSibling.textContent = this.t('net_profit_loss');
-            }
+    getRemainingProfit() {
+        const currentBalance = this.getCurrentBalance();
+        const targetProfit = this.getTargetProfit();
+        return targetProfit - currentBalance;
+    }
 
-            // Restore Grid
-            if (targetGrid) {
-                targetGrid.style.gridTemplateColumns = ''; // Reset to css default
-                targetGrid.style.maxWidth = '';
-                targetGrid.style.margin = '';
-            }
+    getProgressByPeriod(period = '1m') {
+        const now = new Date();
+        let startDate = new Date();
 
-            document.getElementById('targetBadge').textContent = this.getProgressPercentage() >= 100 ? this.t('completed') : this.t('active');
-
-            // Card 1: Target
-            document.getElementById('cardLabel1').textContent = this.t('targeted_profit');
-            document.getElementById('targetProfit').textContent = this.formatCurrency(this.getTargetProfit());
-            document.getElementById('cardSub1').textContent = this.t('target_growth_percentage_full', { targetGrowth: this.settings.targetGrowth });
-
-            // Card 3: Remaining
-            document.getElementById('cardLabel3').textContent = this.t('remaining_to_target');
-            document.getElementById('remainingProfit').textContent = this.formatCurrency(this.getRemainingProfit());
-
-            const estimatedTrades = typeof this.getEstimatedTradesNeeded === 'function' ? this.getEstimatedTradesNeeded() : null;
-            if (this.trades.length === 0) {
-                document.getElementById('remainingTrades').textContent = this.t('no_trades_yet');
-            } else if (this.getRemainingProfit() <= 0) {
-                document.getElementById('remainingTrades').textContent = this.t('target_completed');
-            } else if (!estimatedTrades || estimatedTrades <= 0) {
-                // Show remaining amount instead of "calculating"
-                const remaining = this.getRemainingProfit();
-                const avgProfit = this.getAverageProfit();
-                if (avgProfit > 0) {
-                    const needed = Math.ceil(remaining / avgProfit);
-                    document.getElementById('remainingTrades').textContent = this.t('trades_needed', { count: needed });
+        // Calculate start date based on period
+        switch (period) {
+            case '1d':
+                startDate.setDate(now.getDate() - 1);
+                break;
+            case '1w':
+                startDate.setDate(now.getDate() - 7);
+                break;
+            case '1m':
+                startDate.setMonth(now.getMonth() - 1);
+                break;
+            case '3m':
+                startDate.setMonth(now.getMonth() - 3);
+                break;
+            case 'ytd':
+                startDate = new Date(now.getFullYear(), 0, 1);
+                break;
+            case 'all':
+                // Get account creation date (first trade or initial capital date)
+                if (this.trades.length > 0) {
+                    const sortedTrades = [...this.trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                    startDate = new Date(sortedTrades[0].timestamp);
                 } else {
-                    document.getElementById('remainingTrades').textContent = this.formatCurrency(remaining) + ' ' + this.t('remaining_to_target').toLowerCase();
+                    startDate = new Date(0); // Beginning of time if no trades
                 }
-            } else {
-                document.getElementById('remainingTrades').textContent = this.t('trades_needed', { count: estimatedTrades });
-            }
-
-            document.getElementById('progressLabel').textContent = this.t('completion_rate');
+                break;
+            default:
+                startDate.setMonth(now.getMonth() - 1);
         }
 
-        // Progress Container
-        const progressContainer = document.querySelector('.progress-container');
+        // Filter trades within the period
+        const periodTrades = this.trades.filter(t => {
+            const tradeDate = new Date(t.timestamp);
+            return tradeDate >= startDate && tradeDate <= now;
+        });
 
-        if (isFreeMode) {
-            if (progressContainer) progressContainer.style.display = 'none';
-        } else {
-            if (progressContainer) progressContainer.style.display = 'block';
-        }
+        // Calculate profit/loss for this period
+        const periodProfit = periodTrades.reduce((sum, t) => sum + t.profitLoss, 0);
 
-        // Card 2: Current Net Profit (Common)
+        // Calculate starting balance for this period
+        const allTradesBeforePeriod = this.trades.filter(t => {
+            const tradeDate = new Date(t.timestamp);
+            return tradeDate < startDate;
+        });
+        const startingBalance = this.settings.initialCapital +
+            allTradesBeforePeriod.reduce((sum, t) => sum + t.profitLoss, 0);
+
+        // Calculate percentage
+        if (startingBalance === 0) return 0;
+        return (periodProfit / startingBalance) * 100;
+    }
+
+    updateDashboard() {
         const netProfitValue = this.getNetProfit();
-        document.getElementById('currentProfit').textContent = this.formatCurrency(netProfitValue);
+        const currentBalance = this.getCurrentBalance();
+        const currentPeriod = this.currentChartPeriod || '1m';
+        const progress = this.getProgressByPeriod(currentPeriod);
+        const isCompleted = progress >= 100;
 
-
-        // Progress Calculation
-        let progress = 0;
-        if (isFreeMode) {
-            // Growth Percentage (Unlimited)
-            if (this.settings.initialCapital > 0) {
-                progress = (netProfitValue / this.settings.initialCapital) * 100;
-            }
-        } else {
-            progress = this.getProgressPercentage();
-        }
-
-        document.getElementById('progressPercentage').textContent = `${progress.toFixed(1)}%`;
-
-        // Visual Bar (Limit to 100% for visual sanity, or allow overflow if desired)
-        // For free mode, let's cap the visual bar at 100% but text is unlimited
-        const visualProgress = Math.min(100, Math.max(0, isFreeMode ? (progress < 0 ? 0 : progress) : progress));
-
-        document.getElementById('progressFill').style.width = `${visualProgress}%`;
-        document.getElementById('progressGlow').style.width = `${visualProgress}%`;
-
-        // Profit Change sublabel
-        const profitChangeEl = document.getElementById('profitChange');
-        if (netProfitValue > 0) {
-            profitChangeEl.textContent = this.t('gain_amount', { amount: this.formatCurrency(netProfitValue) });
-            profitChangeEl.className = 'card-sublabel text-success';
-        } else if (netProfitValue < 0) {
-            profitChangeEl.textContent = this.t('loss_amount', { amount: this.formatCurrency(netProfitValue) });
-            profitChangeEl.className = 'card-sublabel text-danger';
-        } else {
-            profitChangeEl.textContent = this.t('starting');
-            profitChangeEl.className = 'card-sublabel';
-        }
-
-        // Target Badge & Share Button Logic
-        const targetBadge = document.getElementById('targetBadge');
-
-        if (isFreeMode) {
-            // Free Mode: No "completion", always active. No share button for completion.
-            targetBadge.textContent = this.t('free_mode');
-            targetBadge.style.background = 'rgba(88, 166, 255, 0.15)';
-            targetBadge.style.borderColor = 'var(--accent-primary)';
-            targetBadge.style.color = 'var(--accent-primary)';
-
-            // Ensure share button is removed
-            const shareBtn = document.getElementById('shareChallengeBtn');
-            if (shareBtn) shareBtn.remove();
-
-        } else {
-            // Challenge Mode Logic
-            if (progress >= 100) {
-                targetBadge.textContent = this.t('completed');
-                targetBadge.style.background = 'rgba(16, 185, 129, 0.15)';
-                targetBadge.style.borderColor = 'var(--accent-success)';
-                targetBadge.style.color = 'var(--accent-success)';
-
-                // Show Share Button if not read only
-                if (!this.isReadOnly) {
-                    let shareBtn = document.getElementById('shareChallengeBtn');
-                    if (!shareBtn) {
-                        shareBtn = document.createElement('button');
-                        shareBtn.id = 'shareChallengeBtn';
-                        shareBtn.className = 'btn-primary';
-                        shareBtn.style.marginTop = '1rem';
-                        shareBtn.style.width = '100%';
-                        shareBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                        shareBtn.innerHTML = this.t('share_challenge');
-
-                        // Insert after progress container
-                        if (progressContainer && !progressContainer.nextElementSibling?.id === 'shareChallengeBtn') {
-                            progressContainer.parentNode.insertBefore(shareBtn, progressContainer.nextSibling);
-                        } else if (progressContainer) {
-                            // Check if already exists to avoid dupes
-                            if (!document.getElementById('shareChallengeBtn')) {
-                                progressContainer.insertAdjacentElement('afterend', shareBtn);
-                            }
-                        }
-
-                        // Add listener
-                        shareBtn.onclick = () => {
-                            this.openShareModal('win');
-                        };
-                    }
-                }
+        const heroBalance = document.getElementById('heroTotalEquity');
+        if (heroBalance) {
+            heroBalance.textContent = this.formatCurrency(currentBalance);
+            // Add color based on profit/loss
+            if (netProfitValue < 0) {
+                heroBalance.style.color = 'var(--neon-red)';
+            } else if (netProfitValue > 0) {
+                heroBalance.style.color = 'var(--neon-green)';
             } else {
-                targetBadge.textContent = this.t('active');
-                targetBadge.style.background = 'rgba(16, 185, 129, 0.15)';
-                targetBadge.style.borderColor = 'var(--accent-success)';
-                targetBadge.style.color = 'var(--accent-success)';
-                // Remove share button if exists
-                const shareBtn = document.getElementById('shareChallengeBtn');
-                if (shareBtn) shareBtn.remove();
+                heroBalance.style.color = 'var(--text-main)';
             }
         }
 
-        // Metrics
-        document.getElementById('currentBalance').textContent = this.formatCurrency(this.getCurrentBalance());
+        // Update period text
+        const statsPeriod = document.getElementById('statsPeriod');
+        const periodTexts = {
+            '1d': 'son 1 günde',
+            '1w': 'son 1 haftada',
+            '1m': 'son 1 ayda',
+            '3m': 'son 3 ayda',
+            'ytd': 'bu yıl',
+            'all': 'başlangıçtan beri'
+        };
+        if (statsPeriod) {
+            statsPeriod.textContent = periodTexts[currentPeriod] || 'başlangıçtan beri';
+        }
+
+        const pnlPercent = document.getElementById('pnlPercent');
+        if (pnlPercent) {
+            pnlPercent.textContent = (progress >= 0 ? '+' : '') + progress.toFixed(1) + '%';
+            const statsTrend = pnlPercent.closest('.stats-trend');
+            statsTrend.className = `stats-trend ${progress >= 0 ? 'positive' : 'negative'}`;
+
+            // Update SVG icon direction
+            const svg = statsTrend.querySelector('svg polyline');
+            if (svg && progress < 0) {
+                // Downward arrow for loss
+                svg.setAttribute('points', '23 18 13.5 8.5 8.5 13.5 1 6');
+            } else if (svg) {
+                // Upward arrow for profit
+                svg.setAttribute('points', '23 6 13.5 15.5 8.5 10.5 1 18');
+            }
+        }
 
         const winRate = this.getWinRate();
-        document.getElementById('winRate').textContent = `${winRate.toFixed(1)}%`;
+        const maxDD = this.getMaxDrawdown();
+        const totalTrades = this.trades.length;
+        const winningTrades = this.trades.filter(t => t.result === 'win').length;
+        const targetProfit = this.getTargetProfit();
+        const remainingProfit = this.getRemainingProfit();
 
-        const wins = this.trades.filter(t => t.result === 'win').length;
-        document.getElementById('winRateDetail').textContent = this.t('win_rate_detail', { wins: wins, totalTrades: this.trades.length });
-
-        const avgRRR = this.getAverageRRR();
-        document.getElementById('avgRRR').textContent = `${avgRRR.toFixed(2)}R`;
-        document.getElementById('rrrDetail').textContent = this.t('winning_trades_detail', { wins: wins });
-
-        document.getElementById('netProfitLoss').textContent = this.formatCurrency(netProfitValue);
-        const profitDetailEl = document.getElementById('profitDetail');
-        profitDetailEl.textContent = this.t('total_trades_detail', { count: this.trades.length });
-        if (netProfitValue > 0) {
-            profitDetailEl.parentElement.querySelector('.metric-value').classList.add('positive');
-            profitDetailEl.parentElement.querySelector('.metric-value').classList.remove('negative');
-        } else if (netProfitValue < 0) {
-            profitDetailEl.parentElement.querySelector('.metric-value').classList.add('negative');
-            profitDetailEl.parentElement.querySelector('.metric-value').classList.remove('positive');
+        const winRatioDetail = document.getElementById('winRatioDetail');
+        if (winRatioDetail) winRatioDetail.textContent = `${winningTrades}/${totalTrades}`;
+        const winRatePercentDetail = document.getElementById('winRatePercentDetail');
+        if (winRatePercentDetail) {
+            winRatePercentDetail.textContent = winRate.toFixed(1) + '%';
+            winRatePercentDetail.className = `card-subvalue ${winRate >= 50 ? 'positive' : 'negative'}`;
         }
 
-        // Max Drawdown
-        const maxDD = this.calculateMaxDrawdown();
-        document.getElementById('maxDrawdown').textContent = `-${maxDD.toFixed(2)}%`;
+        const targetProfitDetail = document.getElementById('targetProfitDetail');
+        if (targetProfitDetail) targetProfitDetail.textContent = this.formatCurrency(targetProfit);
+        const remainingProfitDetail = document.getElementById('remainingProfitDetail');
+        if (remainingProfitDetail) {
+            if (remainingProfit <= 0) {
+                remainingProfitDetail.textContent = 'Hedefe ulaşıldı! 🎯';
+                remainingProfitDetail.style.color = 'var(--neon-green)';
+            } else {
+                remainingProfitDetail.textContent = this.formatCurrency(remainingProfit) + ' kaldı';
+                remainingProfitDetail.style.color = '';
+            }
+        }
 
-        // Update Chart
+        const currentProfitDetail = document.getElementById('currentProfitDetail');
+        if (currentProfitDetail) {
+            currentProfitDetail.textContent = (netProfitValue >= 0 ? '+' : '') + this.formatCurrency(netProfitValue);
+            currentProfitDetail.className = `card-value ${netProfitValue >= 0 ? 'positive' : 'negative'}`;
+        }
+        const profitChangeDetail = document.getElementById('profitChangeDetail');
+        if (profitChangeDetail) {
+            const totalProfitPercent = this.settings.initialCapital > 0
+                ? (netProfitValue / this.settings.initialCapital) * 100
+                : 0;
+            profitChangeDetail.textContent = (netProfitValue >= 0 ? '↑ ' : '↓ ') + Math.abs(totalProfitPercent).toFixed(1) + '%';
+            profitChangeDetail.className = `card-subvalue ${netProfitValue >= 0 ? 'positive' : 'negative'}`;
+        }
+
+        const maxDDDetail = document.getElementById('maxDDDetail');
+        if (maxDDDetail) {
+            maxDDDetail.textContent = maxDD.toFixed(2) + '%';
+            maxDDDetail.style.color = 'var(--neon-red)';
+        }
+
+        // Calculate completion percentage for progress bar (based on target, not period)
+        const targetAmount = this.getTargetProfit();
+        const initialCapital = this.settings.initialCapital;
+        const targetGrowth = targetAmount - initialCapital;
+        const currentGrowth = currentBalance - initialCapital;
+        // If there's a loss (currentGrowth < 0), completion should be 0%, not negative
+        const completionPercentage = targetGrowth > 0
+            ? Math.max(0, (currentGrowth / targetGrowth) * 100)
+            : 0;
+
+        const mainProgressBarFill = document.getElementById('mainProgressBarFill');
+        if (mainProgressBarFill) {
+            mainProgressBarFill.style.width = Math.min(100, Math.max(0, completionPercentage)) + '%';
+            if (completionPercentage >= 100) {
+                mainProgressBarFill.style.background = 'var(--neon-red)';
+                mainProgressBarFill.style.boxShadow = '0 0 15px var(--neon-red-glow)';
+            } else {
+                mainProgressBarFill.style.background = 'linear-gradient(90deg, var(--neon-green-glow), var(--neon-green))';
+                mainProgressBarFill.style.boxShadow = '0 0 15px var(--neon-green-glow)';
+            }
+        }
+        const mainCompletionPercent = document.getElementById('mainCompletionPercent');
+        if (mainCompletionPercent) {
+            mainCompletionPercent.textContent = completionPercentage.toFixed(1) + '%';
+            if (completionPercentage >= 100) mainCompletionPercent.style.color = 'var(--neon-red)';
+            else mainCompletionPercent.style.color = 'inherit';
+        }
+
+        this.updateCircularProgress(completionPercentage);
         this.updateChart();
+    }
+
+    updateCircularProgress(progress) {
+        const circle = document.getElementById('circleProgress');
+        const text = document.getElementById('circlePercent');
+        if (!circle || !text) return;
+
+        const isCompleted = progress >= 100;
+        const p = Math.min(100, Math.max(0, progress));
+
+        circle.style.strokeDasharray = `${p}, 100`;
+        circle.style.stroke = isCompleted ? 'var(--neon-red)' : 'var(--neon-green)';
+
+        text.textContent = progress.toFixed(1) + '%';
+        if (isCompleted) text.style.fill = 'var(--neon-red)';
+        else text.style.fill = 'var(--text-main)';
+    }
+
+    renderRecentActivity() {
+        const container = document.getElementById('recentActivityList');
+        if (!container) return;
+
+        if (this.trades.length === 0) {
+            container.innerHTML = `<div class="empty-state"><span style="opacity: 0.5;">${this.t('no_trades')}</span></div>`;
+            return;
+        }
+
+        // Last 4 trades
+        const recent = [...this.trades]
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .slice(0, 4);
+
+        container.innerHTML = recent.map(trade => {
+            const isWin = trade.result === 'win';
+            const isLoss = trade.result === 'loss';
+            const date = new Date(trade.timestamp);
+            const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            return `
+                <div class="activity-item">
+                    <div class="activity-left">
+                        <div class="activity-icon-box ${trade.result}">
+                            ${isWin ? '📈' : isLoss ? '📉' : '⚖️'}
+                        </div>
+                        <div class="activity-info">
+                            <span class="activity-pair">${trade.pair.toUpperCase()}</span>
+                            <span class="activity-meta">${trade.direction === 'long' ? 'Long' : 'Short'} • ${trade.strategyCompliant ? 'Runner' : 'Manual'}</span>
+                        </div>
+                    </div>
+                    <div class="activity-right">
+                        <span class="activity-amount ${trade.profitLoss >= 0 ? 'positive' : 'negative'}">
+                            ${trade.profitLoss >= 0 ? '+' : ''}${this.formatCurrency(trade.profitLoss)}
+                        </span>
+                        <span class="activity-time">${timeStr}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     showFeedback(feedback) {
@@ -2192,159 +2398,121 @@ class TradingSystem {
         document.getElementById('prevPageBtn').disabled = this.currentPage === 1;
         document.getElementById('nextPageBtn').disabled = this.currentPage === totalPages;
 
-        container.innerHTML = pageTrades.map((trade, index) => {
-            const tradeNumber = sortedTrades.length - (start + index);
+        container.innerHTML = pageTrades.map((trade) => {
+            const isWin = trade.result === 'win';
+            const isLoss = trade.result === 'loss';
+            const isLong = trade.direction === 'long';
 
-            const resultTranslate = {
-                'win': this.t('win_trade'),
-                'loss': this.t('loss_trade'),
-                'be': this.t('be_trade')
-            };
-            const resultEmoji = {
-                'win': '✅',
-                'loss': '❌',
-                'be': '⚖️'
-            };
-            const resultText = `${resultEmoji[trade.result]} ${resultTranslate[trade.result]}`;
+            const amountDisplay = (trade.profitLoss >= 0 ? '+' : '') + this.formatCurrency(trade.profitLoss);
+            const dateObj = new Date(trade.timestamp);
+            const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dayStr = dateObj.toLocaleDateString([], { day: '2-digit', month: 'short' });
 
-            const resultClass = trade.result;
+            // Chart Link HTML
+            const chartHtml = trade.chartUrl ? `
+                <a href="${trade.chartUrl}" target="_blank" class="trade-chart-link" title="${this.t('view_chart_title')}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                    Grafik
+                </a>` : '';
 
-            // Strategy compliance badge
-            let strategyBadge = '';
-            if (!trade.breakdown?.isMultiTP && (trade.result === 'win' || trade.result === 'be') && trade.breakdown) {
-                const rrrDiff = Math.abs((trade.breakdown.firstCloseRRR || 0) - this.settings.rLevel);
-                const percentDiff = Math.abs((trade.breakdown.firstClosePercent || 0) - this.settings.lockPercentage);
-
-                if (rrrDiff <= 0.1 && percentDiff <= 5) {
-                    strategyBadge = `<span class="strategy-badge compliant">✅ ${this.t('strategy_compliant')}</span>`;
-                } else {
-                    strategyBadge = `<span class="strategy-badge deviated">⚠️ ${this.t('strategy_deviated')}</span>`;
+            // Breakdown HTML (Multi-TP or Auto Mode Closes)
+            let breakdownHtml = '';
+            if (trade.breakdown) {
+                if (trade.breakdown.isMultiTP && trade.breakdown.closes && trade.breakdown.closes.length > 0) {
+                    breakdownHtml = `
+                        <div class="trade-breakdown">
+                            <div class="breakdown-header">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                                Çoklu Kar Alımı:
+                            </div>
+                            ${trade.breakdown.closes.map((c, i) => `
+                                <div class="breakdown-row">
+                                    <span>TP ${i + 1} (${c.rrr.toFixed(1)}R @ %${c.percent}):</span>
+                                    <span class="positive">+${this.formatCurrency(c.profit)}</span>
+                                </div>
+                            `).join('')}
+                            <div class="breakdown-row total">
+                                <span>Toplam Kar: (%${trade.breakdown.totalPercent}):</span>
+                                <span class="positive">+${this.formatCurrency(trade.profitLoss)}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (trade.breakdown.firstClose) {
+                    // Standard Auto-Mode breakdown
+                    breakdownHtml = `
+                        <div class="trade-breakdown">
+                            <div class="breakdown-header">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                Kâr Kilitleme (Runner):
+                            </div>
+                            <div class="breakdown-row">
+                                <span>1. Kapanış (${trade.breakdown.firstCloseRRR.toFixed(1)}R @ %${trade.breakdown.firstClosePercent}):</span>
+                                <span class="positive">+${this.formatCurrency(trade.breakdown.firstClose)}</span>
+                            </div>
+                            <div class="breakdown-row">
+                                <span>Runner (${trade.breakdown.runnerCloseRRR.toFixed(1)}R @ %${trade.breakdown.runnerPercent}):</span>
+                                <span class="${trade.breakdown.runnerClose >= 0 ? 'positive' : 'negative'}">
+                                    ${trade.breakdown.runnerClose >= 0 ? '+' : ''}${this.formatCurrency(trade.breakdown.runnerClose)}
+                                </span>
+                            </div>
+                            <div class="breakdown-row total">
+                                <span>Toplam Kar:</span>
+                                <span class="${trade.profitLoss >= 0 ? 'positive' : 'negative'}">
+                                    ${trade.profitLoss >= 0 ? '+' : ''}${this.formatCurrency(trade.profitLoss)}
+                                </span>
+                            </div>
+                        </div>
+                    `;
                 }
-            } else if (trade.breakdown?.isMultiTP) {
-                strategyBadge = `<span class="strategy-badge compliant">🔄 Multi-TP</span>`;
-            }
-
-            // Detailed breakdown
-            let breakdownHTML = '';
-
-            if (trade.breakdown?.isMultiTP) {
-                // Multi-TP Breakdown
-                const rowsHTML = trade.breakdown.closes.map((close, i) => `
-                    <div class="breakdown-item">
-                        <span>TP ${i + 1} (${close.rrr}R @ %${close.percent}):</span>
-                        <span class="positive">+${this.formatCurrency(close.profit)}</span>
-                    </div>
-                `).join('');
-
-                breakdownHTML = `
-                    <div class="trade-breakdown">
-                        <div class="breakdown-title">${this.t('multi_tp_title')}</div>
-                        ${rowsHTML}
-                        <div class="breakdown-total">
-                            <span>${this.t('total_profit_label')} (%${trade.breakdown.totalPercent}):</span>
-                            <span class="positive">+${this.formatCurrency(trade.profitLoss)}</span>
-                        </div>
-                    </div>
-                `;
-            } else if (trade.result === 'win' && trade.breakdown) {
-                breakdownHTML = `
-                    <div class="trade-breakdown">
-                        <div class="breakdown-title">${this.t('profit_distribution_title')}</div>
-                        <div class="breakdown-item">
-                            <span>${this.t('starting')} (${trade.breakdown.firstCloseRRR.toFixed(1)}R @ %${trade.breakdown.firstClosePercent}):</span>
-                            <span class="positive">+${this.formatCurrency(trade.breakdown.firstClose)}</span>
-                        </div>
-                        <div class="breakdown-item">
-                            <span>Runner (${trade.breakdown.runnerCloseRRR.toFixed(1)}R @ %${trade.breakdown.runnerPercent.toFixed(0)}):</span>
-                            <span class="positive">+${this.formatCurrency(trade.breakdown.runnerClose)}</span>
-                        </div>
-                        <div class="breakdown-total">
-                            <span>${this.t('total_profit_label')}</span>
-                            <span class="positive">+${this.formatCurrency(trade.profitLoss)}</span>
-                        </div>
-                    </div>
-                `;
-            } else if (trade.result === 'be' && trade.breakdown) {
-                breakdownHTML = `
-                    <div class="trade-breakdown">
-                        <div class="breakdown-title">${this.t('partial_profit_title')}</div>
-                        <div class="breakdown-item">
-                            <span>${this.t('starting')} (${trade.breakdown.firstCloseRRR.toFixed(1)}R @ %${trade.breakdown.firstClosePercent}):</span>
-                            <span class="positive">+${this.formatCurrency(trade.breakdown.firstClose)}</span>
-                        </div>
-                        <div class="breakdown-item">
-                            <span>Runner (Entry):</span>
-                            <span>${this.formatCurrency(trade.breakdown.runnerClose)}</span>
-                        </div>
-                        <div class="breakdown-total">
-                            <span>${this.t('net_result')}</span>
-                            <span class="positive">+${this.formatCurrency(trade.profitLoss)}</span>
-                        </div>
-                    </div>
-                `;
-            } else if (trade.result === 'loss') {
-                breakdownHTML = `
-                    <div class="trade-breakdown">
-                        <div class="breakdown-title">${this.t('loss_title')}</div>
-                        <div class="breakdown-item">
-                            <span>${this.t('stop_loss')}</span>
-                            <span class="negative">${this.formatCurrency(trade.profitLoss)}</span>
-                        </div>
-                    </div>
-                `;
             }
 
             return `
-                <div class="trade-item ${trade.result}">
-                    <div class="trade-main-info">
-                        <div class="trade-id-row">
-                            <span class="trade-number">#${tradeNumber} ${trade.pair ? `• ${trade.pair}` : ''}</span>
+                <div class="trade-item ${trade.result}" onclick="this.classList.toggle('expanded')">
+                    <div class="trade-main-row">
+                        <div class="trade-pair-info">
+                            <div class="trade-type-icon ${trade.direction}">
+                                ${isLong ? '🔼' : '🔻'}
+                            </div>
+                            <div class="pair-details">
+                                <div class="pair-name-row">
+                                    <span class="trade-pair-name">${trade.pair.toUpperCase()}</span>
+                                    ${chartHtml}
+                                </div>
+                                <div class="trade-meta">
+                                    <span class="direction-badge ${trade.direction}">${trade.direction === 'long' ? 'LONG' : 'SHORT'}</span>
+                                    <span class="meta-dot"></span>
+                                    <span class="trade-date">${dayStr}</span>
+                                </div>
+                            </div>
                         </div>
-                        ${trade.direction ? `
-                        <div class="trade-direction-row">
-                            <span class="direction-text ${trade.direction}">${trade.direction === 'long' ? this.t('long_option') : this.t('short_option')}</span>
-                        </div>` : ''}
                         
-                        <div class="trade-action-bar">
-                            <div class="trade-badges">
-                                <span class="trade-result-badge ${resultClass}">${resultText}</span>
-                                ${strategyBadge}
+                        <div class="trade-right">
+                            <div class="trade-value-group">
+                                <div class="result-amount ${trade.profitLoss >= 0 ? 'positive' : 'negative'}">${amountDisplay}</div>
+                                <div class="trade-time">${timeStr}</div>
                             </div>
-                            <div class="trade-quick-actions">
-                                ${trade.chartUrl ? `<a href="${trade.chartUrl}" target="_blank" class="chart-btn" title="${this.t('view_chart_title')}">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                        <polyline points="15 3 21 3 21 9"></polyline>
-                                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                                    </svg>
-                                </a>` : ''}
-                                ${!this.isReadOnly ? `
-                                <button class="delete-icon-btn" onclick="tradingSystem.deleteTrade(${trade.id})" title="${this.t('delete_trade_title')}">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </button>
-                                ` : ''}
+                            <div class="expand-chevron">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <path d="M6 9l6 6 6-6"></path>
+                                </svg>
                             </div>
+                            ${!this.isReadOnly ? `
+                            <button class="delete-icon-btn" onclick="event.stopPropagation(); tradingSystem.deleteTrade(${trade.id})" title="${this.t('delete_trade_title')}">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                            ` : ''}
                         </div>
                     </div>
-
-                    <div class="trade-divider"></div>
-
-                    <div class="trade-details-v2">
-                        <div class="detail-group">
-                            <span class="detail-label">${this.t('date_label')}</span>
-                            <span class="detail-value">${this.formatDate(trade.timestamp)}</span>
-                        </div>
-                        <div class="detail-group">
-                            <span class="detail-label">${this.t('final_balance')}</span>
-                            <span class="detail-value highlight">${this.formatCurrency(trade.balance)}</span>
-                        </div>
-                    </div>
-
-                    ${breakdownHTML}
-                    ${trade.notes ? `<div class="trade-notes">📝 ${trade.notes}</div>` : ''}
+                    ${breakdownHtml}
                 </div>
             `;
         }).join('');
@@ -2361,17 +2529,20 @@ class TradingSystem {
 
     setupEventListeners() {
         // Theme Toggle
-        document.getElementById('themeBtn').addEventListener('click', () => {
-            this.toggleTheme();
-        });
+        const themeBtn = document.getElementById('themeBtn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                this.toggleTheme();
+            });
+        }
 
-        // Profile Switcher
-        const profileBtn = document.getElementById('currentProfileTitle');
+        // NEW PROFILE SWITCHER (Header Avatar)
+        const profileTrigger = document.getElementById('profileSwitcherTrigger');
         const profileDropdown = document.getElementById('profileDropdown');
         const addProfileBtn = document.getElementById('addProfileBtn');
 
-        if (profileBtn && profileDropdown) {
-            profileBtn.addEventListener('click', (e) => {
+        if (profileTrigger && profileDropdown) {
+            profileTrigger.addEventListener('click', (e) => {
                 e.stopPropagation();
                 profileDropdown.classList.toggle('active');
             });
@@ -2389,18 +2560,48 @@ class TradingSystem {
             if (profileDropdown) profileDropdown.classList.remove('active');
         });
 
+        // TAB NAVIGATION
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const targetId = tab.getAttribute('href');
+                if (targetId && targetId !== '#') {
+                    // Smooth scroll to target if it exists
+                    const targetEl = document.querySelector(targetId);
+                    if (targetEl) {
+                        e.preventDefault();
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                } else if (tab.dataset.tab === 'dashboard') {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        });
+
         // Settings Modal
-        document.getElementById('settingsBtn').addEventListener('click', () => {
-            this.openSettingsModal();
-        });
+        const settingsBtn = document.getElementById('settingsBtn');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                this.openSettingsModal();
+            });
+        }
 
-        document.getElementById('modalClose').addEventListener('click', () => {
-            this.closeSettingsModal();
-        });
+        const modalClose = document.getElementById('modalClose');
+        if (modalClose) {
+            modalClose.addEventListener('click', () => {
+                this.closeSettingsModal();
+            });
+        }
 
-        document.getElementById('modalOverlay').addEventListener('click', () => {
-            this.closeSettingsModal();
-        });
+        const modalOverlay = document.getElementById('modalOverlay');
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', () => {
+                this.closeSettingsModal();
+            });
+        }
 
         // Calculator Modal
         const openCalcBtn = document.getElementById('openCalcBtn');
@@ -2449,15 +2650,68 @@ class TradingSystem {
         }
 
         // Settings Form
-        document.getElementById('settingsForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveSettingsFromForm();
-        });
+        const settingsForm = document.getElementById('settingsForm');
+        if (settingsForm) {
+            settingsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveSettingsFromForm();
+            });
+        }
 
         // Account Mode Toggle Listener
         document.getElementsByName('accountMode').forEach(radio => {
             radio.addEventListener('change', () => {
                 this.updateSettingsVisibility();
+            });
+        });
+
+        // Segmented Controls
+        const setupSegment = (containerId, inputId, onToggle = null) => {
+            const container = document.getElementById(containerId);
+            const input = document.getElementById(inputId);
+            if (!container || !input) return;
+
+            container.querySelectorAll('.segmented-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('.segmented-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    input.value = btn.dataset.value;
+                    if (onToggle) onToggle(btn.dataset.value);
+                });
+            });
+        };
+
+        setupSegment('directionSegment', 'tradeDirection');
+        setupSegment('resultSegment', 'tradeResult', (val) => this.toggleTradeInputs(val));
+
+        // FAB Button
+        const fabBtn = document.getElementById('fabAddBtn');
+        if (fabBtn) {
+            fabBtn.addEventListener('click', () => {
+                document.querySelector('.entry-section').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('tradePair').focus();
+            });
+        }
+
+        // Bottom Nav
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                if (item.id === 'navStats' || item.getAttribute('href') === '#navStats') {
+                    e.preventDefault();
+                    document.getElementById('tradeCalendarSection').scrollIntoView({ behavior: 'smooth' });
+                } else if (item.id === 'navSettings') {
+                    e.preventDefault();
+                    this.openSettingsModal();
+                } else if (item.id === 'navJournal' || item.getAttribute('href') === '#historyContainer') {
+                    const historyEl = document.getElementById('historyContainer');
+                    if (historyEl) {
+                        e.preventDefault();
+                        historyEl.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
             });
         });
 
@@ -2469,28 +2723,47 @@ class TradingSystem {
             this.performFullReset();
         });
 
+        // Clear History ONLY
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        if (clearHistoryBtn) {
+            clearHistoryBtn.addEventListener('click', () => {
+                this.clearAllTrades();
+            });
+        }
+
+        // Calendar Navigation
+        const prevMonth = document.getElementById('prevMonth');
+        const nextMonth = document.getElementById('nextMonth');
+        if (prevMonth) {
+            prevMonth.addEventListener('click', () => this.changeMonth(-1));
+        }
+        if (nextMonth) {
+            nextMonth.addEventListener('click', () => this.changeMonth(1));
+        }
+
         // Trade Form
-        document.getElementById('tradeForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.submitTrade();
-        });
+        const tradeForm = document.getElementById('tradeForm');
+        if (tradeForm) {
+            tradeForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.submitTrade();
+            });
+        }
 
-        document.getElementById('tradeResult').addEventListener('change', (e) => {
-            this.toggleTradeInputs(e.target.value);
-        });
+        const multiTPToggle = document.getElementById('multiTPToggle');
+        if (multiTPToggle) {
+            multiTPToggle.addEventListener('change', (e) => {
+                this.toggleMultiTP(e.target.value);
+            });
+        }
 
-        document.getElementById('multiTPToggle').addEventListener('change', (e) => {
-            this.toggleMultiTP(e.target.value);
-        });
+        const addTPRowBtn = document.getElementById('addTPRowBtn');
+        if (addTPRowBtn) {
+            addTPRowBtn.addEventListener('click', () => {
+                this.addTPRow();
+            });
+        }
 
-        document.getElementById('addTPRowBtn').addEventListener('click', () => {
-            this.addTPRow();
-        });
-
-        // Clear History
-        document.getElementById('clearHistoryBtn').addEventListener('click', () => {
-            this.clearAllTrades();
-        });
 
         // Close Account & Archive
         const closeAccountBtn = document.getElementById('closeAccountBtn');
@@ -2501,13 +2774,19 @@ class TradingSystem {
         }
 
         // Pagination
-        document.getElementById('prevPageBtn').addEventListener('click', () => {
-            this.changePage(-1);
-        });
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        if (prevPageBtn) {
+            prevPageBtn.addEventListener('click', () => {
+                this.changePage(-1);
+            });
+        }
 
-        document.getElementById('nextPageBtn').addEventListener('click', () => {
-            this.changePage(1);
-        });
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        if (nextPageBtn) {
+            nextPageBtn.addEventListener('click', () => {
+                this.changePage(1);
+            });
+        }
 
         // App Share Button (Header)
         const headerShareBtn = document.getElementById('shareBtn');
@@ -2517,6 +2796,16 @@ class TradingSystem {
             });
         }
 
+        // Calendar Clickable Toggle
+        const toggleCalendar = document.getElementById('toggleCalendar');
+        if (toggleCalendar) {
+            toggleCalendar.addEventListener('click', (e) => {
+                // Prevent toggle when clicking navigation buttons
+                if (e.target.closest('.nav-btn')) return;
+                const section = document.getElementById('tradeCalendarSection');
+                if (section) section.classList.toggle('calendar-section-collapsed');
+            });
+        }
         // Share Modal Listeners
         const shareModalClose = document.getElementById('shareModalClose');
         if (shareModalClose) {
@@ -2558,32 +2847,6 @@ class TradingSystem {
                 this.startNewChallenge();
             });
         }
-
-        // Calendar Navigation
-        const prevMonthBtn = document.getElementById('prevMonth');
-        if (prevMonthBtn) {
-            prevMonthBtn.addEventListener('click', () => {
-                this.currentCalendarDate.setMonth(this.currentCalendarDate.getMonth() - 1);
-                this.renderTradeCalendar();
-            });
-        }
-
-        const nextMonthBtn = document.getElementById('nextMonth');
-        if (nextMonthBtn) {
-            nextMonthBtn.addEventListener('click', () => {
-                this.currentCalendarDate.setMonth(this.currentCalendarDate.getMonth() + 1);
-                this.renderTradeCalendar();
-            });
-        }
-
-        // Calendar Expand/Collapse Toggle
-        const toggleCalendar = document.getElementById('toggleCalendar');
-        const calendarSection = document.getElementById('tradeCalendarSection');
-        if (toggleCalendar && calendarSection) {
-            toggleCalendar.addEventListener('click', () => {
-                calendarSection.classList.toggle('calendar-section-collapsed');
-            });
-        }
     }
 
     openShareModal(mode = 'share') {
@@ -2615,15 +2878,80 @@ class TradingSystem {
         document.getElementById('shareModal').classList.add('active');
     }
 
+    // Share Logic
+    generateShareLink() {
+        const baseUrl = window.location.origin + window.location.pathname;
+        const data = this.exportTradeData();
+        // Use LZString if available for compression
+        let finalData = data;
+        if (typeof LZString !== 'undefined') {
+            finalData = LZString.compressToEncodedURIComponent(data);
+        } else {
+            finalData = btoa(unescape(encodeURIComponent(data)));
+        }
+        return `${baseUrl}?data=${finalData}&profile=${encodeURIComponent(this.getActiveProfileName())}`;
+    }
+
+    exportTradeData() {
+        const s = this.settings;
+        const trades = this.trades.map(t => {
+            let breakdownData = 0;
+            if (t.breakdown) {
+                if (t.breakdown.isMultiTP) {
+                    breakdownData = {
+                        m: 1,
+                        c: t.breakdown.closes.map(c => [c.rrr, c.percent, c.profit])
+                    };
+                } else {
+                    breakdownData = {
+                        r: t.breakdown.firstCloseRRR,
+                        p: t.breakdown.firstClosePercent,
+                        rc: t.breakdown.runnerCloseRRR
+                    };
+                }
+            }
+
+            return [
+                t.pair,
+                t.result === 'win' ? 1 : (t.result === 'be' ? 2 : 0),
+                t.profitLoss,
+                Math.floor(new Date(t.timestamp).getTime() / 1000),
+                t.strategyCompliant ? 1 : 0,
+                breakdownData,
+                t.notes || "",
+                t.chartUrl || "",
+                t.direction === 'long' ? 1 : 0
+            ];
+        });
+
+        const exportData = {
+            v: 2, // Version 2 (Ultra-Compact)
+            s: {
+                a: s.accountMode === 'free' ? 1 : 0,
+                c: s.initialCapital,
+                b: s.targetBaseCapital || s.initialCapital,
+                g: s.targetGrowth,
+                r: s.riskPerTrade,
+                l: s.rLevel,
+                p: s.lockPercentage,
+                m: s.manualMode ? 1 : 0,
+                n: s.archiveName || '',
+                lang: s.language || 'tr',
+                curr: s.currency || 'TRY'
+            },
+            t: trades
+        };
+
+        return JSON.stringify(exportData);
+    }
+
     startNewChallenge() {
-        if (confirm('Yeni challenge başlatılacak. Mevcut bakiye başlangıç olarak ayarlanıp işlem geçmişi temizlenecek. Onaylıyor musunuz?')) {
+        if (confirm(this.t('confirm_new_challenge_msg') || 'Yeni challenge başlatılacak. Mevcut bakiye başlangıç olarak ayarlanıp işlem geçmişi temizlenecek. Onaylıyor musunuz?')) {
             // Get current balance before clearing
             const newCapital = this.getCurrentBalance();
 
             // Update settings
             this.settings.initialCapital = newCapital;
-            // Also reset base capital to new capital for fresh start 
-            // (User can manually change base capital in settings if they want "carry over" logic)
             this.settings.targetBaseCapital = newCapital;
             this.saveSettings();
 
@@ -2632,17 +2960,19 @@ class TradingSystem {
             this.saveTrades();
 
             // Update UI
-            document.getElementById('shareModal').classList.remove('active');
+            const shareModal = document.getElementById('shareModal');
+            if (shareModal) shareModal.classList.remove('active');
+
             this.updateDashboard();
             this.renderTradeHistory();
 
             // Update form input visual
-            document.getElementById('initialCapital').value = newCapital;
+            const initialCapInput = document.getElementById('initialCapital');
+            if (initialCapInput) initialCapInput.value = newCapital;
 
-            this.showNotification('Yeni challenge başlatıldı! Bol kazançlar 🚀', 'success');
+            this.showNotification(this.t('challenge_started_notification') || 'Yeni challenge başlatıldı! Bol kazançlar 🚀', 'success');
         }
     }
-
 
 
     // Calculator Logic
@@ -2653,39 +2983,55 @@ class TradingSystem {
         const lotSize = parseFloat(document.getElementById('calcLotSize').value) || 0;
 
         const profit = risk * r * (p / 100);
-        document.getElementById('calcResult').textContent = this.formatCurrency(profit);
 
-        // Lot hesaplama - MT5 mobil için
+        // Show only numeric value, the currency span in HTML will handle the symbol or we can use formatCurrency if we remove symbol from HTML
+        const resultEl = document.getElementById('calcResult');
+        if (resultEl) {
+            resultEl.textContent = this.formatCurrency(profit).replace(/[₺$]/g, '').trim();
+        }
+
+        // Lot calculation
+        const lotResultEl = document.getElementById('lotResult');
+        const lotResultBox = document.getElementById('lotResultBox');
+
         if (lotSize > 0 && p > 0) {
             const lotsToClose = (lotSize * p / 100).toFixed(2);
-            document.getElementById('lotResult').textContent = `${lotsToClose} lot`;
-            document.getElementById('lotResultBox').style.display = 'block';
+            if (lotResultEl) lotResultEl.textContent = `${lotsToClose} lot`;
+            if (lotResultBox) lotResultBox.style.display = 'block';
         } else {
-            document.getElementById('lotResultBox').style.display = 'none';
+            if (lotResultBox) lotResultBox.style.display = 'none';
         }
     }
 
     toggleTradeInputs(result) {
         // Hide all conditional inputs
-        document.getElementById('firstCloseRRRGroup').style.display = 'none';
-        document.getElementById('firstClosePercentGroup').style.display = 'none';
-        document.getElementById('runnerCloseRRRGroup').style.display = 'none';
-        document.getElementById('beCloseRRRGroup').style.display = 'none';
-        document.getElementById('beClosePercentGroup').style.display = 'none';
-        document.getElementById('multiTPToggleGroup').style.display = 'none';
-        document.getElementById('multiTPContainer').style.display = 'none';
-        document.getElementById('manualLossGroup').style.display = 'none'; // ADDED
+        if (document.getElementById('firstCloseRRRGroup')) document.getElementById('firstCloseRRRGroup').style.display = 'none';
+        if (document.getElementById('firstClosePercentGroup')) document.getElementById('firstClosePercentGroup').style.display = 'none';
+        if (document.getElementById('runnerCloseRRRGroup')) document.getElementById('runnerCloseRRRGroup').style.display = 'none';
+        if (document.getElementById('beCloseRRRGroup')) document.getElementById('beCloseRRRGroup').style.display = 'none';
+        if (document.getElementById('beClosePercentGroup')) document.getElementById('beClosePercentGroup').style.display = 'none';
+        if (document.getElementById('multiTPToggleGroup')) document.getElementById('multiTPToggleGroup').style.display = 'none';
+        if (document.getElementById('multiTPContainer')) document.getElementById('multiTPContainer').style.display = 'none';
+        if (document.getElementById('manualLossGroup')) document.getElementById('manualLossGroup').style.display = 'none';
 
         // Clear required attributes
-        document.getElementById('firstCloseRRR').required = false;
-        document.getElementById('firstClosePercent').required = false;
-        document.getElementById('runnerCloseRRR').required = false;
-        document.getElementById('beCloseRRR').required = false;
-        document.getElementById('beClosePercent').required = false;
-        document.getElementById('manualLossAmount').required = false; // ADDED
+        if (document.getElementById('firstCloseRRR')) document.getElementById('firstCloseRRR').required = false;
+        if (document.getElementById('firstClosePercent')) document.getElementById('firstClosePercent').required = false;
+        if (document.getElementById('runnerCloseRRR')) document.getElementById('runnerCloseRRR').required = false;
+        if (document.getElementById('beCloseRRR')) document.getElementById('beCloseRRR').required = false;
+        if (document.getElementById('beClosePercent')) document.getElementById('beClosePercent').required = false;
+        if (document.getElementById('manualLossAmount')) document.getElementById('manualLossAmount').required = false;
+
+        // Remove required from any existing TP rows
+        document.querySelectorAll('#tpRows input').forEach(input => input.required = false);
+
+        // Clear dynamic rows to avoid hidden required fields issues
+        const tpRows = document.getElementById('tpRows');
+        if (tpRows) tpRows.innerHTML = '';
 
         // Reset Multi TP
-        document.getElementById('multiTPToggle').value = 'no';
+        const multiTPToggle = document.getElementById('multiTPToggle');
+        if (multiTPToggle) multiTPToggle.value = 'no';
 
         // Check manual mode
         const isManualMode = this.settings.manualMode;
@@ -2714,14 +3060,14 @@ class TradingSystem {
                 document.getElementById('beCloseRRRGroup').style.display = 'flex';
                 document.getElementById('beClosePercentGroup').style.display = 'flex';
 
-                document.getElementById('beCloseRRR').required = true;
-                document.getElementById('beClosePercent').required = true;
+                if (document.getElementById('beCloseRRR')) document.getElementById('beCloseRRR').required = true;
+                if (document.getElementById('beClosePercent')) document.getElementById('beClosePercent').required = true;
             }
         } else if (result === 'loss') {
             if (isManualMode) {
                 // Manual Mode Loss: Show amount input
-                document.getElementById('manualLossGroup').style.display = 'block';
-                document.getElementById('manualLossAmount').required = true;
+                if (document.getElementById('manualLossGroup')) document.getElementById('manualLossGroup').style.display = 'block';
+                if (document.getElementById('manualLossAmount')) document.getElementById('manualLossAmount').required = true;
             }
         }
     }
@@ -2729,33 +3075,38 @@ class TradingSystem {
     toggleMultiTP(value) {
         if (value === 'yes') {
             // Show Multi TP, Hide Standard
-            document.getElementById('firstCloseRRRGroup').style.display = 'none';
-            document.getElementById('firstClosePercentGroup').style.display = 'none';
-            document.getElementById('runnerCloseRRRGroup').style.display = 'none';
+            if (document.getElementById('firstCloseRRRGroup')) document.getElementById('firstCloseRRRGroup').style.display = 'none';
+            if (document.getElementById('firstClosePercentGroup')) document.getElementById('firstClosePercentGroup').style.display = 'none';
+            if (document.getElementById('runnerCloseRRRGroup')) document.getElementById('runnerCloseRRRGroup').style.display = 'none';
 
-            document.getElementById('firstCloseRRR').required = false;
-            document.getElementById('firstClosePercent').required = false;
-            document.getElementById('runnerCloseRRR').required = false;
+            if (document.getElementById('firstCloseRRR')) document.getElementById('firstCloseRRR').required = false;
+            if (document.getElementById('firstClosePercent')) document.getElementById('firstClosePercent').required = false;
+            if (document.getElementById('runnerCloseRRR')) document.getElementById('runnerCloseRRR').required = false;
 
-            document.getElementById('multiTPContainer').style.display = 'block';
+            if (document.getElementById('multiTPContainer')) document.getElementById('multiTPContainer').style.display = 'block';
 
             // Add initial rows if empty
             const container = document.getElementById('tpRows');
-            if (container.children.length === 0) {
+            if (container && container.children.length === 0) {
                 this.addTPRow();
                 this.addTPRow();
             }
         } else {
             // Show Standard, Hide Multi TP
-            document.getElementById('firstCloseRRRGroup').style.display = 'flex';
-            document.getElementById('firstClosePercentGroup').style.display = 'flex';
-            document.getElementById('runnerCloseRRRGroup').style.display = 'flex';
+            if (document.getElementById('firstCloseRRRGroup')) document.getElementById('firstCloseRRRGroup').style.display = 'flex';
+            if (document.getElementById('firstClosePercentGroup')) document.getElementById('firstClosePercentGroup').style.display = 'flex';
+            if (document.getElementById('runnerCloseRRRGroup')) document.getElementById('runnerCloseRRRGroup').style.display = 'flex';
 
-            document.getElementById('firstCloseRRR').required = true;
-            document.getElementById('firstClosePercent').required = true;
-            document.getElementById('runnerCloseRRR').required = true;
+            // Remove required from multi TP rows when hiding
+            document.querySelectorAll('#tpRows input').forEach(input => input.required = false);
+            const tpRows = document.getElementById('tpRows');
+            if (tpRows) tpRows.innerHTML = '';
 
-            document.getElementById('multiTPContainer').style.display = 'none';
+            if (document.getElementById('firstCloseRRR')) document.getElementById('firstCloseRRR').required = true;
+            if (document.getElementById('firstClosePercent')) document.getElementById('firstClosePercent').required = true;
+            if (document.getElementById('runnerCloseRRR')) document.getElementById('runnerCloseRRR').required = true;
+
+            if (document.getElementById('multiTPContainer')) document.getElementById('multiTPContainer').style.display = 'none';
         }
     }
 
@@ -2814,13 +3165,18 @@ class TradingSystem {
     }
 
     submitTrade() {
-        const result = document.getElementById('tradeResult').value;
-        const pair = document.getElementById('tradePair').value.toUpperCase();
-        const direction = document.getElementById('tradeDirection').value;
-        const notes = document.getElementById('tradeNotes').value.trim();
-        const isMultiTP = document.getElementById('multiTPToggle').value === 'yes';
+        const getVal = (id) => {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        };
 
-        const chartUrl = document.getElementById('chartUrl').value.trim();
+        const result = getVal('tradeResult');
+        const pair = getVal('tradePair').toUpperCase();
+        const direction = getVal('tradeDirection');
+        const notes = getVal('tradeNotes').trim();
+        const isMultiTP = getVal('multiTPToggle') === 'yes';
+
+        const chartUrl = getVal('chartUrl').trim();
 
         // Validation
         if (!pair || !direction || !result) {
@@ -2899,9 +3255,9 @@ class TradingSystem {
 
             } else {
                 // Standard Auto Mode Win
-                const firstCloseRRR = parseFloat(document.getElementById('firstCloseRRR').value);
-                const firstClosePercent = parseFloat(document.getElementById('firstClosePercent').value);
-                const runnerCloseRRR = parseFloat(document.getElementById('runnerCloseRRR').value);
+                const firstCloseRRR = parseFloat(getVal('firstCloseRRR'));
+                const firstClosePercent = parseFloat(getVal('firstClosePercent'));
+                const runnerCloseRRR = parseFloat(getVal('runnerCloseRRR'));
 
                 if (!firstCloseRRR || !firstClosePercent || !runnerCloseRRR) {
                     alert('Lütfen tüm kazanç bilgilerini girin');
@@ -2931,8 +3287,8 @@ class TradingSystem {
                     runnerClose: 0
                 };
             } else {
-                const firstCloseRRR = parseFloat(document.getElementById('beCloseRRR').value);
-                const firstClosePercent = parseFloat(document.getElementById('beClosePercent').value);
+                const firstCloseRRR = parseFloat(getVal('beCloseRRR'));
+                const firstClosePercent = parseFloat(getVal('beClosePercent'));
 
                 if (!firstCloseRRR || !firstClosePercent) {
                     alert('Lütfen BE işlem bilgilerini girin');
@@ -2948,7 +3304,7 @@ class TradingSystem {
             const isManualMode = this.settings.manualMode;
 
             if (isManualMode) {
-                const lossAmount = parseFloat(document.getElementById('manualLossAmount').value);
+                const lossAmount = parseFloat(getVal('manualLossAmount'));
                 if (isNaN(lossAmount)) {
                     alert('Lütfen kayıp miktarını girin');
                     return;
@@ -2973,10 +3329,21 @@ class TradingSystem {
         const feedback = this.generateFeedback(trade);
         this.showFeedback(feedback);
 
-        // Reset Form
-        document.getElementById('tradeForm').reset();
-        this.toggleTradeInputs('');
-        document.getElementById('tpRows').innerHTML = ''; // Clear TP rows
+        // FORM RESET & STAY IN POSITION
+        const form = document.getElementById('tradeForm');
+        form.reset();
+
+        // Reset Segmented UI visually
+        document.querySelectorAll('#directionSegment .segmented-btn').forEach(b => b.classList.remove('active'));
+        const longBtn = document.querySelector('#directionSegment .segmented-btn[data-value="long"]');
+        if (longBtn) longBtn.classList.add('active');
+
+        document.querySelectorAll('#resultSegment .segmented-btn').forEach(b => b.classList.remove('active'));
+        const winBtn = document.querySelector('#resultSegment .segmented-btn[data-value="win"]');
+        if (winBtn) winBtn.classList.add('active');
+
+        // Ensure sub-inputs stay visible for 'win'
+        this.toggleTradeInputs('win');
 
         // Scroll to feedback if exists
         if (feedback) {
@@ -2992,6 +3359,7 @@ class TradingSystem {
         document.getElementById('riskPerTrade').value = this.settings.riskPerTrade;
         document.getElementById('rLevel').value = this.settings.rLevel;
         document.getElementById('lockPercentage').value = this.settings.lockPercentage;
+        document.getElementById('targetBaseCapital').value = this.settings.targetBaseCapital || this.settings.initialCapital;
         document.getElementById('manualMode').checked = this.settings.manualMode;
 
         // Language and Currency
@@ -3005,21 +3373,43 @@ class TradingSystem {
         // Add listener for manual mode toggle in settings
         document.getElementById('manualMode').onchange = () => this.updateSettingsVisibility();
 
-        // Account Mode Logic
-        const mode = this.settings.accountMode || 'challenge'; // Default legacy to challenge
-        const radios = document.getElementsByName('accountMode');
-        let found = false;
-        radios.forEach(r => {
-            if (r.value === mode) {
-                r.checked = true;
-                found = true;
-            }
+        // Sync Target Growth Rate with Target Base Capital
+        const initialCapitalInput = document.getElementById('initialCapital');
+        const targetGrowthInput = document.getElementById('targetGrowth');
+        const targetBaseCapitalInput = document.getElementById('targetBaseCapital');
+
+        // When target growth % changes, update target base capital
+        targetGrowthInput.addEventListener('input', () => {
+            const initial = parseFloat(initialCapitalInput.value) || 0;
+            const growthPercent = parseFloat(targetGrowthInput.value) || 0;
+            const targetBase = initial * (1 + growthPercent / 100);
+            targetBaseCapitalInput.value = Math.round(targetBase);
         });
-        if (!found && radios.length > 0) radios[0].checked = true;
 
-        // Trigger visibility update
+        // When target base capital changes, update target growth %
+        targetBaseCapitalInput.addEventListener('input', () => {
+            const initial = parseFloat(initialCapitalInput.value) || 1;
+            const targetBase = parseFloat(targetBaseCapitalInput.value) || 0;
+            const growthPercent = ((targetBase - initial) / initial) * 100;
+            targetGrowthInput.value = growthPercent.toFixed(2);
+        });
+
+        // When initial capital changes, recalculate based on growth %
+        initialCapitalInput.addEventListener('input', () => {
+            const initial = parseFloat(initialCapitalInput.value) || 0;
+            const growthPercent = parseFloat(targetGrowthInput.value) || 0;
+            const targetBase = initial * (1 + growthPercent / 100);
+            targetBaseCapitalInput.value = Math.round(targetBase);
+        });
+
+        // Account Mode Logic
+        const mode = this.settings.accountMode || 'challenge';
+        const radios = document.getElementsByName('accountMode');
+        radios.forEach(r => {
+            if (r.value === mode) r.checked = true;
+        });
+
         this.updateSettingsVisibility();
-
         document.getElementById('settingsModal').classList.add('active');
     }
 
@@ -3264,6 +3654,13 @@ class TradingSystem {
         return dailyPnL;
     }
 
+    changeMonth(direction) {
+        const newDate = new Date(this.currentCalendarDate);
+        newDate.setMonth(newDate.getMonth() + direction);
+        this.currentCalendarDate = newDate;
+        this.renderTradeCalendar();
+    }
+
     renderTradeCalendar() {
         const container = document.getElementById('pnlCalendar');
         const monthYearLabel = document.getElementById('currentMonthYear');
@@ -3417,5 +3814,107 @@ let tradingSystem;
 
 document.addEventListener('DOMContentLoaded', () => {
     tradingSystem = new TradingSystem();
+    window.tradingSystem = tradingSystem; // Expose globally
     console.log('🚀 Runner R-Performance Tracker V2.1 initialized successfully!');
+
+    // Close Account and Archive Button
+    const closeAccountBtn = document.getElementById('closeAccountBtn');
+    if (closeAccountBtn) {
+        closeAccountBtn.addEventListener('click', async function () {
+            if (!confirm('Hesabınızı kapatmak ve tüm verileri arşivlemek istediğinize emin misiniz?\n\nVerileriniz indirilecek ve ardından hesap sıfırlanacaktır.')) {
+                return;
+            }
+
+            try {
+                // Export data
+                const exportData = {
+                    exportDate: new Date().toISOString(),
+                    profile: tradingSystem.settings.archiveName || 'My Trading Data',
+                    settings: tradingSystem.settings,
+                    trades: tradingSystem.trades,
+                    totalTrades: tradingSystem.trades.length,
+                    netProfit: tradingSystem.getNetProfit(),
+                    winRate: tradingSystem.getWinRate()
+                };
+
+                // Create and download file
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `trading-archive-${tradingSystem.settings.archiveName || 'data'}-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                // Wait a bit for download to start, then confirm reset
+                setTimeout(() => {
+                    if (confirm('Arşiv indirildi. Şimdi hesabı sıfırlamak istiyor musunuz?')) {
+                        // Reset all trades
+                        tradingSystem.trades = [];
+                        tradingSystem.saveTrades();
+                        tradingSystem.refreshUI();
+
+                        // Close modal
+                        const modal = document.getElementById('settingsModal');
+                        if (modal) modal.style.display = 'none';
+
+                        alert('Hesap başarıyla sıfırlandı! Arşiv dosyanız indirildi.');
+                    }
+                }, 1000);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Arşivleme sırasında bir hata oluştu: ' + error.message);
+            }
+        });
+    }
+
+    // Floating Action Button - Scroll to Trade Entry
+    const fabButton = document.getElementById('fabAddTrade');
+    if (fabButton) {
+        fabButton.addEventListener('click', function () {
+            const tradeEntrySection = document.getElementById('tradeEntrySection');
+            if (tradeEntrySection) {
+                tradeEntrySection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+
+                // Activate the "Araçlar" tab
+                const toolsTab = document.querySelector('.tab-item[data-tab="tools"]');
+                if (toolsTab) {
+                    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                    toolsTab.classList.add('active');
+                }
+            }
+        });
+    }
+
+    // Time Selector Buttons
+    const timeBtns = document.querySelectorAll('.time-btn');
+    if (timeBtns.length > 0) {
+        timeBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                // Remove active class from all buttons
+                timeBtns.forEach(b => b.classList.remove('active'));
+                // Add active to clicked button
+                this.classList.add('active');
+
+                // Get period and update chart AND dashboard
+                const period = this.getAttribute('data-period');
+                if (tradingSystem) {
+                    tradingSystem.currentChartPeriod = period;
+                    if (tradingSystem.updateChart) {
+                        tradingSystem.updateChart();
+                    }
+                    if (tradingSystem.updateDashboard) {
+                        tradingSystem.updateDashboard();
+                    }
+                }
+            });
+        });
+    }
 });
