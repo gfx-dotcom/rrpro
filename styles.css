@@ -1520,7 +1520,8 @@ body.readonly .layout-side {
 
 .calendar-wrapper {
     padding: 1.5rem;
-    max-width: 800px;
+    max-width: 950px;
+    width: 100%;
     margin: 0 auto;
 }
 
@@ -2565,6 +2566,12 @@ input:focus {
         grid-template-columns: 1fr 400px;
         align-items: start;
         gap: 30px;
+    }
+
+    /* Desktop Calendar Optimization: Fix huge cells */
+    .calendar-day {
+        aspect-ratio: auto !important;
+        height: 85px;
     }
 
     .layout-main {
