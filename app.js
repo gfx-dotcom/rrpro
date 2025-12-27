@@ -315,6 +315,13 @@ class TradingSystem {
             welcome_feature_2: "Otomatik risk/ödül hesaplama",
             welcome_feature_3: "Takvim ve analiz araçları",
             welcome_feature_4: "Hedef takibi ve raporlama",
+            win_rate_label: "Kazanma Oranı",
+            winrate_final_label: "Winrate",
+            target_label: "Hedef",
+            net_pnl_label: "Net Kar/Zarar",
+            max_dd_label: "Düşüş",
+            remaining_suffix: "kaldı",
+            max_dd_sublabel: "Zirveden düşüş",
             welcome_dont_show_label: "Bir daha gösterme",
             target_base_help_text: "⚠️ Hesaplama <strong>Hedeflenen Sermaye'ye</strong> göre yapılır. Hedef Büyüme Oranı ile uyumlu olmalıdır.<br>Örn: 50K hesap ve %8 hedef için → Hedeflenen Sermaye: 54,000, Büyüme: %8.<br><br><a href='#' onclick='document.getElementById(\"helpBtn\").click(); return false;' style='color: var(--neon-green); text-decoration: underline; font-weight: bold;'>👉 Detaylı bilgi ve örnek senaryo için buraya tıklayın.</a>"
         },
@@ -573,6 +580,13 @@ class TradingSystem {
             welcome_feature_2: "Automatic risk/reward calculation",
             welcome_feature_3: "Calendar and analysis tools",
             welcome_feature_4: "Goal tracking and reporting",
+            win_rate_label: "Win Rate",
+            winrate_final_label: "Winrate",
+            target_label: "Target",
+            net_pnl_label: "Net P&L",
+            max_dd_label: "Max Drawdown",
+            remaining_suffix: "remain",
+            max_dd_sublabel: "Max DD",
             welcome_dont_show_label: "Don't show again",
             target_base_help_text: "⚠️ Calculations are based on <strong>Target Base Capital</strong>. It must be consistent with the Target Growth Rate.<br>Ex: For 50K account & 8% target → Base Capital: 54,000, Growth: 8%.<br><br><a href='#' onclick='document.getElementById(\"helpBtn\").click(); return false;' style='color: var(--neon-green); text-decoration: underline; font-weight: bold;'>👉 Click here for detailed info and example scenario.</a>"
         }
@@ -2276,7 +2290,7 @@ class TradingSystem {
                     remainingProfitDetail.textContent = 'Hedefe ulaşıldı! 🎯';
                     remainingProfitDetail.style.color = 'var(--neon-green)';
                 } else {
-                    remainingProfitDetail.textContent = this.formatCurrency(remainingProfit) + ' kaldı';
+                    remainingProfitDetail.textContent = this.formatCurrency(remainingProfit) + ' ' + this.t('remaining_suffix');
                     remainingProfitDetail.style.color = '';
                 }
             }
@@ -2349,6 +2363,29 @@ class TradingSystem {
 
         this.updateCircularProgress(completionPercentage);
         this.updateChart();
+
+        // FORCE FIX: Ensure Win Rate Label is correct
+        setTimeout(() => {
+            const lang = this.settings.language || 'tr';
+            const correctLabel = lang === 'tr' ? "Kazanma Oranı" : "Win Rate";
+
+            const winLabels = document.querySelectorAll('[data-i18n="winrate_final_label"]');
+            winLabels.forEach(el => {
+                if (el.innerHTML !== correctLabel) {
+                    el.innerHTML = correctLabel;
+                    el.style.visibility = "visible";
+                }
+            });
+
+            // Force Fix for Max DD Label ('TAMAMLANMA' -> 'Düşüş')
+            const ddLabelCorrect = lang === 'tr' ? "Düşüş" : "Max Drawdown";
+            const ddLabels = document.querySelectorAll('[data-i18n="max_dd_label"]');
+            ddLabels.forEach(el => {
+                if (el.innerHTML !== ddLabelCorrect) {
+                    el.innerHTML = ddLabelCorrect;
+                }
+            });
+        }, 50);
     }
 
     updateCircularProgress(progress) {
