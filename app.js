@@ -316,7 +316,7 @@ class TradingSystem {
             welcome_feature_3: "Takvim ve analiz araçları",
             welcome_feature_4: "Hedef takibi ve raporlama",
             welcome_dont_show_label: "Bir daha gösterme",
-            target_base_help_text: "⚠️ Hesaplama <strong>Hedeflenen Sermaye'ye</strong> göre yapılır. Hedef Büyüme Oranı ile uyumlu olmalıdır.<br>Örn: 50K hesap ve %8 hedef için → Hedeflenen Sermaye: 54,000, Büyüme: %8."
+            target_base_help_text: "⚠️ Hesaplama <strong>Hedeflenen Sermaye'ye</strong> göre yapılır. Hedef Büyüme Oranı ile uyumlu olmalıdır.<br>Örn: 50K hesap ve %8 hedef için → Hedeflenen Sermaye: 54,000, Büyüme: %8.<br><br><a href='#' onclick='document.getElementById(\"helpBtn\").click(); return false;' style='color: var(--neon-green); text-decoration: underline; font-weight: bold;'>👉 Detaylı bilgi ve örnek senaryo için buraya tıklayın.</a>"
         },
         en: {
             current_balance: "Current Balance",
@@ -574,7 +574,7 @@ class TradingSystem {
             welcome_feature_3: "Calendar and analysis tools",
             welcome_feature_4: "Goal tracking and reporting",
             welcome_dont_show_label: "Don't show again",
-            target_base_help_text: "⚠️ Calculations are based on <strong>Target Base Capital</strong>. It must be consistent with the Target Growth Rate.<br>Ex: For 50K account & 8% target → Base Capital: 54,000, Growth: 8%."
+            target_base_help_text: "⚠️ Calculations are based on <strong>Target Base Capital</strong>. It must be consistent with the Target Growth Rate.<br>Ex: For 50K account & 8% target → Base Capital: 54,000, Growth: 8%.<br><br><a href='#' onclick='document.getElementById(\"helpBtn\").click(); return false;' style='color: var(--neon-green); text-decoration: underline; font-weight: bold;'>👉 Click here for detailed info and example scenario.</a>"
         }
     };
 
