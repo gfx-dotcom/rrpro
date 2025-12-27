@@ -1635,8 +1635,22 @@ textarea:focus {
 /* Trade Calendar Styles */
 .trade-calendar-section {
     margin-bottom: var(--spacing-lg);
-    max-width: 800px;
-    /* Desktop'ta çok yayılmasın */
+    max-width: 100%;
+    /* Masaüstünde yan yana gelebilmesi için genişletildi */
+}
+
+.calendar-layout-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-top: 10px;
+    transition: all 0.4s ease;
+}
+
+.calendar-section-collapsed .calendar-layout-container {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
 }
 
 .calendar-header-clickable {
@@ -1698,20 +1712,70 @@ textarea:focus {
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     padding: 12px;
-    overflow: hidden;
-    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease;
-    max-height: 1000px;
-    opacity: 1;
-    margin-top: 10px;
+    flex: 2;
+    /* Takvim 2 birim yer kaplasın */
+    min-width: 0;
+    background: var(--bg-card);
 }
 
-.calendar-section-collapsed .calendar-wrapper {
-    max-height: 0;
-    opacity: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: 0;
-    border-color: transparent;
+.stats-sidebar {
+    flex: 1;
+    /* İstatistikler 1 birim yer kaplasın */
+    min-width: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.stats-group {
+    margin-bottom: 8px;
+}
+
+.stats-group-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 6px;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 0.85rem;
+}
+
+.stats-pair {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stats-value {
+    color: var(--text-secondary);
+}
+
+.stats-value.positive {
+    color: #2ecc71;
+}
+
+.stats-value.negative {
+    color: #e74c3c;
+}
+
+.empty-stats {
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 20px;
 }
 
 .calendar-grid {
@@ -1816,11 +1880,25 @@ textarea:focus {
         padding: 5px 12px;
     }
 
+    .calendar-layout-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .stats-sidebar {
+        width: 100%;
+        min-width: 100%;
+        order: 2;
+        /* Stats below calendar */
+    }
+
     .calendar-wrapper {
         padding: 8px 3px;
         /* Minimal side padding */
         overflow-x: auto;
         /* Safety for very small screens */
+        width: 100%;
+        order: 1;
     }
 
     .calendar-toggle-icon {

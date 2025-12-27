@@ -180,6 +180,13 @@ class TradingSystem {
             be_first_close_rrr: "Kâr kilitleme yaptığınız R seviyesi",
             be_first_close_percent: "Kâr kilitlediğiniz pozisyon yüzdesi",
             pnl_calendar: "📅 KÂR/ZARAR TAKVİMİ",
+            pair_stats_title: "📊 EN BAŞARILI PARİTELER",
+            most_traded: "En Çok İşlem",
+            top_profit: "En Yüksek Kâr",
+            top_winrate: "En İyi Oran",
+            pair_label: "Parite",
+            trades_label: "İşlem",
+            winrate_label: "Başarı",
             trade_notes_label: "İşlem Notları (Opsiyonel)",
             trade_notes_placeholder: "Kapanış dağılımı veya diğer notlar...",
             trade_pair_placeholder: "Örn: USDJPY",
@@ -498,6 +505,13 @@ class TradingSystem {
             snapshot_desc: "This link displays trades at the time of sharing. To see subsequently added or deleted trades, request an updated link from the account owner.",
             start_your_own: "Start Your Own Tracker",
             pnl_calendar: "📅 P\u0026L CALENDAR",
+            pair_stats_title: "📊 TOP PERFORMANCE",
+            most_traded: "Most Traded",
+            top_profit: "Top Profit",
+            top_winrate: "Top Win Rate",
+            pair_label: "Pair",
+            trades_label: "Trades",
+            winrate_label: "Success",
             economic_calendar_title: "📅 ECONOMIC CALENDAR"
         }
     };
@@ -894,6 +908,7 @@ class TradingSystem {
         this.renderTradeHistory();
         this.renderProfileList();
         this.renderTradeCalendar(); // Takvimi güncelle
+        this.renderPairStats(); // Parite istatistiklerini güncelle
     }
 
     checkSharedUrl() {
@@ -1863,8 +1878,7 @@ class TradingSystem {
             this.trades = [];
             this.saveTrades();
 
-            this.updateDashboard();
-            this.renderTradeHistory();
+            this.refreshUI();
             this.showNotification(this.t('trades_cleared_notification'), 'info');
         }
     }
@@ -1875,8 +1889,7 @@ class TradingSystem {
             this.recalculateBalances();
             this.saveTrades();
 
-            this.updateDashboard();
-            this.renderTradeHistory();
+            this.refreshUI();
         }
     }
 
@@ -2954,8 +2967,7 @@ class TradingSystem {
         const trade = this.addTrade(tradeData);
 
         // Update UI
-        this.updateDashboard();
-        this.renderTradeHistory();
+        this.refreshUI();
 
         // Show Feedback
         const feedback = this.generateFeedback(trade);
@@ -3129,8 +3141,7 @@ class TradingSystem {
         this.settings = newSettings;
         this.saveSettings();
         this.updateStaticTranslations();
-        this.updateDashboard();
-        this.renderTradeHistory();
+        this.refreshUI();
         this.closeSettingsModal();
         this.showNotification(this.t('notification_settings_saved'), 'success');
     }
@@ -3201,8 +3212,7 @@ class TradingSystem {
         document.getElementById('manualMode').checked = this.settings.manualMode;
 
         // Update UI
-        this.updateDashboard();
-        this.renderTradeHistory();
+        this.refreshUI();
         this.closeSettingsModal();
 
         // Reset button text
@@ -3319,6 +3329,67 @@ class TradingSystem {
         }
 
         html += '</div>';
+        container.innerHTML = html;
+    }
+
+    renderPairStats() {
+        const container = document.getElementById('pairStatsContainer');
+        if (!container) return;
+
+        if (this.trades.length === 0) {
+            container.innerHTML = `<div class="empty-stats">${this.t('no_trades')}</div>`;
+            return;
+        }
+
+        const stats = {};
+        this.trades.forEach(t => {
+            const pair = (t.pair || "OTH").toUpperCase();
+            if (!stats[pair]) stats[pair] = { count: 0, profit: 0, wins: 0 };
+            stats[pair].count++;
+            stats[pair].profit += t.profitLoss;
+            if (t.result === 'win') stats[pair].wins++;
+        });
+
+        const sortedByCount = Object.entries(stats).sort((a, b) => b[1].count - a[1].count).slice(0, 3);
+        const sortedByProfit = Object.entries(stats).sort((a, b) => b[1].profit - a[1].profit).slice(0, 3);
+        const sortedByWinRate = Object.entries(stats)
+            .filter(a => a[1].count >= 2) // En az 2 işlem
+            .sort((a, b) => (b[1].wins / b[1].count) - (a[1].wins / a[1].count))
+            .slice(0, 3);
+
+        let html = `
+            <div class="stats-sidebar-inner">
+                <div class="stats-group">
+                    <div class="stats-group-title">${this.t('most_traded')}</div>
+                    ${sortedByCount.map(([pair, s]) => `
+                        <div class="stats-row">
+                            <span class="stats-pair">${pair}</span>
+                            <span class="stats-value">${s.count} ${this.t('trades_label')}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="stats-group">
+                    <div class="stats-group-title">${this.t('top_profit')}</div>
+                    ${sortedByProfit.map(([pair, s]) => `
+                        <div class="stats-row">
+                            <span class="stats-pair">${pair}</span>
+                            <span class="stats-value ${s.profit >= 0 ? 'positive' : 'negative'}">${this.formatCurrency(s.profit)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="stats-group">
+                    <div class="stats-group-title">${this.t('top_winrate')}</div>
+                    ${sortedByWinRate.map(([pair, s]) => `
+                        <div class="stats-row">
+                            <span class="stats-pair">${pair}</span>
+                            <span class="stats-value">${((s.wins / s.count) * 100).toFixed(0)}%</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
         container.innerHTML = html;
     }
 
