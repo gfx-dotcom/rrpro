@@ -304,18 +304,19 @@ class TradingSystem {
             welcome_step3_header: "Journal Tutmaya Başlayın",
             welcome_step3_desc: "Ayarlarınızı yaptıktan sonra <strong>'Kaydet'</strong> butonuna tıklayarak journal tutmaya başlayabilirsiniz!",
             welcome_example_status: "<strong>Durum:</strong> 50K hesabınız var ama siteyi 51K'da buldunuz.",
-            welcome_solution: "💡 <strong>Çözüm:</strong> Manuel Modu açınız. Başlangıç sermayesine 51,000 yazın, ardından Hedef Baz Sermayesi kısmını <strong>54,000</strong> olarak düzeltin.",
+            welcome_solution: "💡 <strong>Örnek:</strong> 50K Phase 1 hesabınız var ve 51,000'desiniz. Geçmek için 54,000 yani %8 büyüme gerek.<br><strong>Ayarlar:</strong> Başlangıç Sermayesi: 51,000 → Hedeflenen Sermaye: 54,000 → Büyüme Oranı: %8<br><br>👉 En özgür şekilde ilerlemek için manuel modu aktif ediniz.",
             welcome_card_challenge_title: "Challenge (Hedef Odaklı)",
             welcome_card_challenge_desc: "Prop firm challenge veya hedef odaklı trading için idealdir.",
             welcome_card_free_title: "Serbest (Sadece Takip)",
             welcome_card_free_desc: "Broker veya live hesap takibi için idealdir.",
             welcome_example_list_start: "<strong>Başlangıç Sermayesi:</strong> 51,000 ₺ (Mevcut Bakiye)",
-            welcome_example_list_target: "<strong>Hedef:</strong> 54,000 ₺ (50K hesabın %8 hedefi)",
+            welcome_example_list_target: "<strong>Hedef:</strong> 54,000 ₺ - Büyüme Oranı %8 (Aşama % kaçta geçiliyorsa)",
             welcome_feature_1: "Real-time performans takibi",
             welcome_feature_2: "Otomatik risk/ödül hesaplama",
             welcome_feature_3: "Takvim ve analiz araçları",
             welcome_feature_4: "Hedef takibi ve raporlama",
-            welcome_dont_show_label: "Bir daha gösterme"
+            welcome_dont_show_label: "Bir daha gösterme",
+            target_base_help_text: "⚠️ Hesaplama <strong>Hedeflenen Sermaye'ye</strong> göre yapılır. Hedef Büyüme Oranı ile uyumlu olmalıdır.<br>Örn: 50K hesap ve %8 hedef için → Hedeflenen Sermaye: 54,000, Büyüme: %8."
         },
         en: {
             current_balance: "Current Balance",
@@ -561,18 +562,19 @@ class TradingSystem {
             welcome_step3_desc: "After configuring settings, click <strong>'Save'</strong> to start journaling!",
             welcome_step3_header: "Start Journaling",
             welcome_example_status: "<strong>Scenario:</strong> You have a 50K account but found this site at 51K.",
-            welcome_solution: "💡 <strong>Solution:</strong> Enable Manual Mode. Enter 51,000 as Initial Capital, then set Target Base Capital to <strong>54,000</strong>.",
+            welcome_solution: "💡 <strong>Example:</strong> You have a 50K Phase 1 account at 51,000. To pass, you need 54,000 (8% growth).<br><strong>Settings:</strong> Initial Capital: 51,000 → Target Base Capital: 54,000 → Growth Rate: 8%<br><br>👉 Activate Manual Mode for the most flexible experience.",
             welcome_card_challenge_title: "Challenge (Target Based)",
             welcome_card_challenge_desc: "Ideal for prop firm challenges or goal-oriented trading.",
             welcome_card_free_title: "Free (Tracking Only)",
             welcome_card_free_desc: "Ideal for broker or live account tracking.",
             welcome_example_list_start: "<strong>Starting Capital:</strong> 51,000 ₺ (Current Balance)",
-            welcome_example_list_target: "<strong>Target:</strong> 54,000 ₺ (8% target of 50K account)",
+            welcome_example_list_target: "<strong>Target:</strong> 54,000 ₺ - Growth Rate 8% (Depending on passing requirement)",
             welcome_feature_1: "Real-time performance tracking",
             welcome_feature_2: "Automatic risk/reward calculation",
             welcome_feature_3: "Calendar and analysis tools",
             welcome_feature_4: "Goal tracking and reporting",
-            welcome_dont_show_label: "Don't show again"
+            welcome_dont_show_label: "Don't show again",
+            target_base_help_text: "⚠️ Calculations are based on <strong>Target Base Capital</strong>. It must be consistent with the Target Growth Rate.<br>Ex: For 50K account & 8% target → Base Capital: 54,000, Growth: 8%."
         }
     };
 
