@@ -54,6 +54,14 @@
                             <line x1="12" y1="2" x2="12" y2="15"></line>
                         </svg>
                     </button>
+                    <button class="notif-btn" id="helpBtn" title="Nasıl Kullanılır?">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </button>
                     <button class="settings-btn" id="settingsBtn" title="Ayarlar">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
@@ -656,6 +664,109 @@
     <button class="fab-button" id="fabAddTrade" aria-label="Add Trade">
         +
     </button>
+
+    <!-- Welcome/Onboarding Modal -->
+    <div class="modal" id="welcomeModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container welcome-modal-container">
+            <div class="modal-header">
+                <h3 data-i18n="welcome_modal_title">🎯 RR Pro'ya Hoşgeldiniz!</h3>
+                <button class="modal-close" id="welcomeModalClose">×</button>
+            </div>
+            <div class="modal-body welcome-modal-body">
+                <!-- Step 1: Hesap Türleri -->
+                <div class="welcome-section">
+                    <div class="welcome-step-header">
+                        <span class="step-number">1</span>
+                        <h4 data-i18n="welcome_account_mode">Hesap Türünü Seçin</h4>
+                    </div>
+                    <p class="welcome-text" data-i18n="welcome_step1_desc">
+                        Ayarlar kısmında <strong>2 çeşit hesap türü</strong> bulunmaktadır:
+                    </p>
+                    <div class="account-types-grid">
+                        <div class="account-type-card challenge">
+                            <div class="card-icon">⚡</div>
+                            <h5 data-i18n="welcome_card_challenge_title">Challenge (Hedef Odaklı)</h5>
+                            <p data-i18n="welcome_card_challenge_desc">Prop firm challenge veya hedef odaklı trading
+                                için idealdir.</p>
+                        </div>
+                        <div class="account-type-card free">
+                            <div class="card-icon">📊</div>
+                            <h5 data-i18n="welcome_card_free_title">Serbest (Sadece Takip)</h5>
+                            <p data-i18n="welcome_card_free_desc">Broker veya live hesap takibi için idealdir.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: İlk Ayarlar -->
+                <div class="welcome-section">
+                    <div class="welcome-step-header">
+                        <span class="step-number">2</span>
+                        <h4 data-i18n="welcome_settings">İlk Ayarlarınızı Yapın</h4>
+                    </div>
+                    <p class="welcome-text" data-i18n="welcome_step2_desc">
+                        <strong>Challenge modu</strong> için başlangıç sermaye ve hedef büyüme oranını girin:
+                    </p>
+                    <div class="example-box">
+                        <div class="example-header" data-i18n="welcome_scenario">📝 Örnek Senaryo</div>
+                        <div class="example-content">
+                            <p data-i18n="welcome_example_status"><strong>Durum:</strong> 50K hesabınız var ama siteyi
+                                51K'da buldunuz.</p>
+                            <ul>
+                                <li data-i18n="welcome_example_list_start"><strong>Başlangıç Sermayesi:</strong> 51,000
+                                    ₺ (Mevcut Bakiye)</li>
+                                <li data-i18n="welcome_example_list_target"><strong>Hedef:</strong> 54,000 ₺ (50K
+                                    hesabın %8 hedefi)</li>
+                            </ul>
+                            <div class="tip-box" data-i18n="welcome_solution">
+                                💡 <strong>Çözüm:</strong> Manuel Modu açınız. Başlangıç sermayesine 51,000 yazın,
+                                ardından Hedef Baz Sermayesi kısmını <strong>54,000</strong> olarak düzeltin.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Journal Tutmaya Başlayın -->
+                <div class="welcome-section">
+                    <div class="welcome-step-header">
+                        <span class="step-number">3</span>
+                        <h4 data-i18n="welcome_step3_header">Journal Tutmaya Başlayın</h4>
+                    </div>
+                    <p class="welcome-text" data-i18n="welcome_step3_desc">
+                        Ayarlarınızı yaptıktan sonra <strong>"Kaydet"</strong> butonuna tıklayarak journal tutmaya
+                        başlayabilirsiniz!
+                    </p>
+                    <div class="feature-highlights">
+                        <div class="feature-item">
+                            <span class="feature-icon">📊</span>
+                            <span data-i18n="welcome_feature_1">Real-time performans takibi</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">📈</span>
+                            <span data-i18n="welcome_feature_2">Otomatik risk/ödül hesaplama</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">📅</span>
+                            <span data-i18n="welcome_feature_3">Takvim ve analiz araçları</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🎯</span>
+                            <span data-i18n="welcome_feature_4">Hedef takibi ve raporlama</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Don't Show Again Option -->
+                <div class="welcome-footer">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="dontShowAgain">
+                        <span data-i18n="welcome_dont_show_label">Bir daha gösterme</span>
+                    </label>
+                    <button class="btn-primary" id="startJournalBtn" data-i18n="welcome_start_btn">Başla 🚀</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>

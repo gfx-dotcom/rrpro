@@ -3153,3 +3153,206 @@ input:focus {
     background: var(--border-glass);
     border-radius: 10px;
 }
+
+/* Welcome / Onboarding Modal Styles */
+.welcome-modal-container {
+    max-width: 800px;
+    width: 95%;
+    background: #0f1014 !important;
+    /* Extremely dark background */
+    border: 1px solid var(--border-glass);
+    border-top: 4px solid var(--neon-green);
+    /* Top accent */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+    /* Heavy shadow */
+    position: relative;
+    z-index: 1001;
+}
+
+.welcome-modal-body {
+    padding: 32px;
+    gap: 32px;
+    background: #0f1014 !important;
+}
+
+.welcome-section {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    /* More visible separator */
+    padding-bottom: 24px;
+}
+
+.welcome-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.welcome-step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.step-number {
+    width: 28px;
+    height: 28px;
+    background: var(--neon-green);
+    color: #000;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.welcome-step-header h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.welcome-text {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.welcome-text strong {
+    color: var(--text-main);
+}
+
+/* Account Types Grid */
+.account-types-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.account-type-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border-glass);
+    padding: 20px;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.account-type-card:hover {
+    border-color: var(--neon-green);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+.account-type-card .card-icon {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+}
+
+.account-type-card h5 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.account-type-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Example Box */
+.example-box {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.example-header {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-glass);
+}
+
+.example-content {
+    padding: 16px;
+    font-size: 0.9rem;
+}
+
+.example-content ul {
+    margin: 12px 0;
+    padding-left: 20px;
+    color: var(--text-muted);
+}
+
+.example-content li {
+    margin-bottom: 6px;
+}
+
+.tip-box {
+    margin-top: 12px;
+    padding: 10px;
+    background: rgba(255, 204, 0, 0.1);
+    border-radius: 8px;
+    color: #ffcc00;
+    font-size: 0.85rem;
+}
+
+/* Feature Highlights */
+.feature-highlights {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+}
+
+.feature-icon {
+    font-size: 1.2rem;
+}
+
+/* Footer */
+.welcome-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-glass);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .account-types-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .feature-highlights {
+        grid-template-columns: 1fr;
+    }
+
+    .welcome-modal-body {
+        padding: 20px;
+    }
+}

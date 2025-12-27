@@ -289,7 +289,33 @@ class TradingSystem {
             snapshot_title: "📸 Bu Link Anlık Görüntü İçerir",
             snapshot_desc: "Bu link paylaşıldığı andaki trade'leri gösterir. Daha sonra eklenen veya silinen trade'leri görmek için hesap sahibinden güncel linki isteyiniz.",
             start_your_own: "Kendi Takibini Başlat",
-            economic_calendar_title: "📅 EKONOMİK TAKVİM"
+            economic_calendar_title: "📅 EKONOMİK TAKVİM",
+            welcome_modal_title: "🎯 RR Pro'ya Hoşgeldiniz!",
+            welcome_intro: "Profesyonel Trading Performans Takip Sistemine sadece birkaç adımda başlayın.",
+            welcome_account_mode: "⚖️ Hesap Modunu Seçin",
+            welcome_challenge_desc: "Prop firmalarının kurallarına göre hedeflenen karı belirli bir sürede yapmaya çalışın.",
+            welcome_free_desc: "Hedef olmadan sadece performansınızı ve büyümenizi takip edin.",
+            welcome_settings: "⚙️ Başlangıç Ayarlarını Yapın",
+            welcome_scenario: "📝 Örnek Senaryo",
+            welcome_dont_show: "Bir daha gösterme",
+            welcome_start_btn: "Jurnale Başla 🚀",
+            welcome_step1_desc: "Ayarlar kısmında <strong>2 çeşit hesap türü</strong> bulunmaktadır:",
+            welcome_step2_desc: "<strong>Challenge modu</strong> için başlangıç sermaye ve hedef büyüme oranını girin:",
+            welcome_step3_header: "Journal Tutmaya Başlayın",
+            welcome_step3_desc: "Ayarlarınızı yaptıktan sonra <strong>'Kaydet'</strong> butonuna tıklayarak journal tutmaya başlayabilirsiniz!",
+            welcome_example_status: "<strong>Durum:</strong> 50K hesabınız var ama siteyi 51K'da buldunuz.",
+            welcome_solution: "💡 <strong>Çözüm:</strong> Manuel Modu açınız. Başlangıç sermayesine 51,000 yazın, ardından Hedef Baz Sermayesi kısmını <strong>54,000</strong> olarak düzeltin.",
+            welcome_card_challenge_title: "Challenge (Hedef Odaklı)",
+            welcome_card_challenge_desc: "Prop firm challenge veya hedef odaklı trading için idealdir.",
+            welcome_card_free_title: "Serbest (Sadece Takip)",
+            welcome_card_free_desc: "Broker veya live hesap takibi için idealdir.",
+            welcome_example_list_start: "<strong>Başlangıç Sermayesi:</strong> 51,000 ₺ (Mevcut Bakiye)",
+            welcome_example_list_target: "<strong>Hedef:</strong> 54,000 ₺ (50K hesabın %8 hedefi)",
+            welcome_feature_1: "Real-time performans takibi",
+            welcome_feature_2: "Otomatik risk/ödül hesaplama",
+            welcome_feature_3: "Takvim ve analiz araçları",
+            welcome_feature_4: "Hedef takibi ve raporlama",
+            welcome_dont_show_label: "Bir daha gösterme"
         },
         en: {
             current_balance: "Current Balance",
@@ -520,7 +546,33 @@ class TradingSystem {
             pair_label: "Pair",
             trades_label: "Trades",
             winrate_label: "Success",
-            economic_calendar_title: "📅 ECONOMIC CALENDAR"
+            economic_calendar_title: "📅 ECONOMIC CALENDAR",
+            welcome_modal_title: "🎯 Welcome to RR Pro!",
+            welcome_intro: "Start using the Professional Trading Performance Tracker in just a few steps.",
+            welcome_account_mode: "⚖️ Select Account Mode",
+            welcome_challenge_desc: "Try to reach a specific profit target within a certain time according to prop firm rules.",
+            welcome_free_desc: "Track your performance and growth without any targets.",
+            welcome_settings: "⚙️ Configure Initial Settings",
+            welcome_scenario: "📝 Example Scenario",
+            welcome_dont_show: "Don't show again",
+            welcome_start_btn: "Start Journal 🚀",
+            welcome_step1_desc: "There are <strong>2 account types</strong> in the settings:",
+            welcome_step2_desc: "Enter starting capital and target growth rate for <strong>Challenge mode</strong>:",
+            welcome_step3_desc: "After configuring settings, click <strong>'Save'</strong> to start journaling!",
+            welcome_step3_header: "Start Journaling",
+            welcome_example_status: "<strong>Scenario:</strong> You have a 50K account but found this site at 51K.",
+            welcome_solution: "💡 <strong>Solution:</strong> Enable Manual Mode. Enter 51,000 as Initial Capital, then set Target Base Capital to <strong>54,000</strong>.",
+            welcome_card_challenge_title: "Challenge (Target Based)",
+            welcome_card_challenge_desc: "Ideal for prop firm challenges or goal-oriented trading.",
+            welcome_card_free_title: "Free (Tracking Only)",
+            welcome_card_free_desc: "Ideal for broker or live account tracking.",
+            welcome_example_list_start: "<strong>Starting Capital:</strong> 51,000 ₺ (Current Balance)",
+            welcome_example_list_target: "<strong>Target:</strong> 54,000 ₺ (8% target of 50K account)",
+            welcome_feature_1: "Real-time performance tracking",
+            welcome_feature_2: "Automatic risk/reward calculation",
+            welcome_feature_3: "Calendar and analysis tools",
+            welcome_feature_4: "Goal tracking and reporting",
+            welcome_dont_show_label: "Don't show again"
         }
     };
 
@@ -550,7 +602,7 @@ class TradingSystem {
             } else if (el.tagName === 'OPTION') {
                 el.textContent = text;
             } else {
-                el.textContent = text;
+                el.innerHTML = text;
             }
         });
 
@@ -1625,18 +1677,7 @@ class TradingSystem {
         return (this.settings.initialCapital * this.settings.riskPerTrade) / 100;
     }
 
-    // Calculate Target Profit (TL)
-    getTargetProfit() {
-        const base = this.settings.targetBaseCapital || this.settings.initialCapital;
-        return base * (this.settings.targetGrowth / 100);
-    }
-
-    // Calculate Remaining amount to reach target
-    getRemainingProfit() {
-        const target = this.getTargetProfit();
-        const currentNet = this.getNetProfit();
-        return Math.max(0, target - currentNet);
-    }
+    // Obsolete Duplicate Methods Removed to fix calculation logic
 
     // Calculate Trade Profit/Loss with Flexible Parameters
     calculateTradeResult(result, firstCloseRRR, firstClosePercent, runnerCloseRRR) {
@@ -2076,8 +2117,12 @@ class TradingSystem {
     }
 
     getTargetProfit() {
-        // Target is initial capital + (initial capital × target growth %)
-        // For example: 50,000 + (50,000 × 0.08) = 54,000
+        // If Target Base Capital is set (which acts as the explicit target amount now), use it.
+        // This solves the issue where Initial Capital (51k) overrides the true target (54k).
+        if (this.settings.targetBaseCapital && this.settings.targetBaseCapital > 0) {
+            return this.settings.targetBaseCapital;
+        }
+        // Fallback
         const targetAmount = this.settings.initialCapital * (1 + this.settings.targetGrowth / 100);
         return targetAmount;
     }
@@ -2211,15 +2256,27 @@ class TradingSystem {
         }
 
         const targetProfitDetail = document.getElementById('targetProfitDetail');
-        if (targetProfitDetail) targetProfitDetail.textContent = this.formatCurrency(targetProfit);
         const remainingProfitDetail = document.getElementById('remainingProfitDetail');
-        if (remainingProfitDetail) {
-            if (remainingProfit <= 0) {
-                remainingProfitDetail.textContent = 'Hedefe ulaşıldı! 🎯';
-                remainingProfitDetail.style.color = 'var(--neon-green)';
-            } else {
-                remainingProfitDetail.textContent = this.formatCurrency(remainingProfit) + ' kaldı';
-                remainingProfitDetail.style.color = '';
+
+        if (this.settings.accountMode === 'free') {
+            // Free Mode Configuration
+            if (targetProfitDetail) targetProfitDetail.textContent = '∞';
+            if (remainingProfitDetail) {
+                remainingProfitDetail.textContent = 'Serbest Büyüme 📈';
+                remainingProfitDetail.style.color = 'var(--neon-blue)';
+            }
+        } else {
+            // Challenge Mode Configuration
+            if (targetProfitDetail) targetProfitDetail.textContent = this.formatCurrency(targetProfit);
+
+            if (remainingProfitDetail) {
+                if (remainingProfit <= 0) {
+                    remainingProfitDetail.textContent = 'Hedefe ulaşıldı! 🎯';
+                    remainingProfitDetail.style.color = 'var(--neon-green)';
+                } else {
+                    remainingProfitDetail.textContent = this.formatCurrency(remainingProfit) + ' kaldı';
+                    remainingProfitDetail.style.color = '';
+                }
             }
         }
 
@@ -2243,12 +2300,29 @@ class TradingSystem {
             maxDDDetail.style.color = 'var(--neon-red)';
         }
 
-        // Calculate completion percentage for progress bar (based on target, not period)
+        // Calculate completion percentage for progress bar
         const targetAmount = this.getTargetProfit();
-        const initialCapital = this.settings.initialCapital;
-        const targetGrowth = targetAmount - initialCapital;
-        const currentGrowth = currentBalance - initialCapital;
-        // If there's a loss (currentGrowth < 0), completion should be 0%, not negative
+        let baseCapital = this.settings.initialCapital;
+
+        // Advanced Calculation for Challenge Mode:
+        // If the user entered a Target Base Capital (e.g. 54k) and a Growth Rate (e.g. 8%),
+        // but started tracking at a higher balance (e.g. 51k), we should calculate progress 
+        // based on the IMPLIED base capital (50k), not the tracking start price (51k).
+        // Formula: ImpliedBase = Target / (1 + GrowthRate)
+        if (this.settings.accountMode === 'challenge' && this.settings.targetGrowth > 0) {
+            const impliedBase = targetAmount / (1 + (this.settings.targetGrowth / 100));
+
+            // If implied base is smaller than initial (tracking started late), use implied base
+            // e.g. 50000 < 51000 -> Use 50000 as the start point for progress bar
+            if (impliedBase < baseCapital) {
+                baseCapital = impliedBase;
+            }
+        }
+
+        const targetGrowth = targetAmount - baseCapital;
+        const currentGrowth = currentBalance - baseCapital;
+
+        // If there's a loss relative to base, completion is 0%
         const completionPercentage = targetGrowth > 0
             ? Math.max(0, (currentGrowth / targetGrowth) * 100)
             : 0;
@@ -3378,29 +3452,8 @@ class TradingSystem {
         const targetGrowthInput = document.getElementById('targetGrowth');
         const targetBaseCapitalInput = document.getElementById('targetBaseCapital');
 
-        // When target growth % changes, update target base capital
-        targetGrowthInput.addEventListener('input', () => {
-            const initial = parseFloat(initialCapitalInput.value) || 0;
-            const growthPercent = parseFloat(targetGrowthInput.value) || 0;
-            const targetBase = initial * (1 + growthPercent / 100);
-            targetBaseCapitalInput.value = Math.round(targetBase);
-        });
-
-        // When target base capital changes, update target growth %
-        targetBaseCapitalInput.addEventListener('input', () => {
-            const initial = parseFloat(initialCapitalInput.value) || 1;
-            const targetBase = parseFloat(targetBaseCapitalInput.value) || 0;
-            const growthPercent = ((targetBase - initial) / initial) * 100;
-            targetGrowthInput.value = growthPercent.toFixed(2);
-        });
-
-        // When initial capital changes, recalculate based on growth %
-        initialCapitalInput.addEventListener('input', () => {
-            const initial = parseFloat(initialCapitalInput.value) || 0;
-            const growthPercent = parseFloat(targetGrowthInput.value) || 0;
-            const targetBase = initial * (1 + growthPercent / 100);
-            targetBaseCapitalInput.value = Math.round(targetBase);
-        });
+        // Auto-sync event listeners removed to allow free editing as requested by user.
+        // Users can now set Initial Capital (e.g. 51k), Target Growth (e.g. 8%), and Target Base Capital (e.g. 54k) independently.
 
         // Account Mode Logic
         const mode = this.settings.accountMode || 'challenge';
@@ -3805,6 +3858,36 @@ class TradingSystem {
     showNotification(message, type = 'info') {
         console.log(`${type.toUpperCase()}: ${message}`);
     }
+
+    // Welcome Modal Methods
+    checkWelcomeModal() {
+        const welcomeModalSeen = localStorage.getItem('welcomeModalSeen');
+        if (!welcomeModalSeen) {
+            this.openWelcomeModal();
+        }
+    }
+
+    openWelcomeModal() {
+        const modal = document.getElementById('welcomeModal');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+    }
+
+    closeWelcomeModal() {
+        const modal = document.getElementById('welcomeModal');
+        const dontShowAgain = document.getElementById('dontShowAgain');
+
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+
+            if (dontShowAgain && dontShowAgain.checked) {
+                localStorage.setItem('welcomeModalSeen', 'true');
+            }
+        }
+    }
 }
 
 // ===================================
@@ -3816,6 +3899,26 @@ document.addEventListener('DOMContentLoaded', () => {
     tradingSystem = new TradingSystem();
     window.tradingSystem = tradingSystem; // Expose globally
     console.log('🚀 Runner R-Performance Tracker V2.1 initialized successfully!');
+
+    // Initialize Welcome Modal
+    // tradingSystem.checkWelcomeModal(); // Disabled auto-open
+
+    // Welcome Modal Event Listeners
+    const helpBtn = document.getElementById('helpBtn');
+    const welcomeModalClose = document.getElementById('welcomeModalClose');
+    const startJournalBtn = document.getElementById('startJournalBtn');
+
+    if (helpBtn) {
+        helpBtn.addEventListener('click', () => tradingSystem.openWelcomeModal());
+    }
+
+    if (welcomeModalClose) {
+        welcomeModalClose.addEventListener('click', () => tradingSystem.closeWelcomeModal());
+    }
+
+    if (startJournalBtn) {
+        startJournalBtn.addEventListener('click', () => tradingSystem.closeWelcomeModal());
+    }
 
     // Close Account and Archive Button
     const closeAccountBtn = document.getElementById('closeAccountBtn');
