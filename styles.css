@@ -2035,11 +2035,23 @@ input:focus {
 }
 
 .trade-item.loss {
-    border-left: 5px solid #ff4d4d;
+    border-left: 5px solid #ff4d4d !important;
 }
 
 .trade-item.be {
-    border-left: 5px solid var(--neon-purple);
+    border-left: 5px solid #ffaa00 !important;
+}
+
+.trade-type-icon.be-icon {
+    color: #ffaa00 !important;
+    background: rgba(255, 170, 0, 0.1) !important;
+    border-color: rgba(255, 170, 0, 0.2) !important;
+}
+
+.trade-type-icon.loss-icon {
+    color: #ff4d4d !important;
+    background: rgba(255, 77, 77, 0.1) !important;
+    border-color: rgba(255, 77, 77, 0.2) !important;
 }
 
 .trade-pair-info {
@@ -3162,6 +3174,129 @@ input:focus {
     .trade-header-left {
         width: 100%;
     }
+}
+
+/* =========================================
+   NEW FEEDBACK CARD STYLES (Modern & Dismissible)
+   ========================================= */
+.feedback-section {
+    animation: slideInFeedback 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-bottom: 24px;
+}
+
+@keyframes slideInFeedback {
+    0% {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+html body .feedback-card {
+    position: relative;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex !important;
+    /* Force flex */
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    /* Glassmorphism Dark */
+    background: rgba(13, 17, 23, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+html body .feedback-card.warning {
+    border-left: 4px solid #d29922;
+    /* Amber */
+    background: linear-gradient(90deg, rgba(210, 153, 34, 0.1) 0%, rgba(13, 17, 23, 0) 60%);
+}
+
+html body .feedback-card.info {
+    border-left: 4px solid #58a6ff;
+    /* Blue */
+    background: linear-gradient(90deg, rgba(88, 166, 255, 0.1) 0%, rgba(13, 17, 23, 0) 60%);
+}
+
+html body .feedback-card.success {
+    border-left: 4px solid #2ea043;
+    /* Green */
+    background: linear-gradient(90deg, rgba(46, 160, 67, 0.1) 0%, rgba(13, 17, 23, 0) 60%);
+}
+
+.feedback-icon {
+    font-size: 1.6rem;
+    line-height: 1;
+    padding-top: 2px;
+}
+
+.feedback-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.feedback-content h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+    color: #e6edf3;
+    /* Default white */
+}
+
+/* Specific text colors */
+.feedback-card.warning h4 {
+    color: #d29922;
+}
+
+.feedback-card.success h4 {
+    color: #2ea043;
+}
+
+.feedback-card.info h4 {
+    color: #58a6ff;
+}
+
+.feedback-content p {
+    font-size: 0.95rem;
+    color: #8b949e;
+    /* Muted */
+    line-height: 1.5;
+    margin: 0;
+}
+
+.feedback-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    color: #8b949e;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.feedback-close-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e6edf3;
+}
+
+.feedback-close-btn svg {
+    width: 18px;
+    height: 18px;
 }
 
 /* Dark Mode Text Visibility Fixes */

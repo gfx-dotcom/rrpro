@@ -39,12 +39,13 @@ class TradingSystem {
     getDefaultSettings() {
         return {
             initialCapital: 50000,
+            targetBaseCapital: 54000, // Varsayılan hedef baz sermaye
             targetGrowth: 8,
             riskPerTrade: 0.5,
             rLevel: 1.2,
             lockPercentage: 70,
-            manualMode: false,
-            accountMode: 'challenge', // 'challenge' or 'free'
+            manualMode: true, // Manuel mod varsayılan açık
+            accountMode: 'challenge',
             archiveName: 'RUNNER TRADER JOURNAL',
             language: 'tr',
             currency: 'TRY'
@@ -322,6 +323,8 @@ class TradingSystem {
             max_dd_label: "Düşüş",
             remaining_suffix: "kaldı",
             max_dd_sublabel: "Zirveden düşüş",
+            backup_download: "⬇️ Yedeği İndir",
+            backup_upload: "⬆️ Yedeği Yükle",
             welcome_dont_show_label: "Bir daha gösterme",
             target_base_help_text: "⚠️ Hesaplama <strong>Hedeflenen Sermaye'ye</strong> göre yapılır. Hedef Büyüme Oranı ile uyumlu olmalıdır.<br>Örn: 50K hesap ve %8 hedef için → Hedeflenen Sermaye: 54,000, Büyüme: %8.<br><br><a href='#' onclick='document.getElementById(\"helpBtn\").click(); return false;' style='color: var(--neon-green); text-decoration: underline; font-weight: bold;'>👉 Detaylı bilgi ve örnek senaryo için buraya tıklayın.</a>"
         },
@@ -587,6 +590,8 @@ class TradingSystem {
             max_dd_label: "Max Drawdown",
             remaining_suffix: "remain",
             max_dd_sublabel: "Max DD",
+            backup_download: "⬇️ Download Backup",
+            backup_upload: "⬆️ Upload Backup",
             welcome_dont_show_label: "Don't show again",
             target_base_help_text: "⚠️ Calculations are based on <strong>Target Base Capital</strong>. It must be consistent with the Target Growth Rate.<br>Ex: For 50K account & 8% target → Base Capital: 54,000, Growth: 8%.<br><br><a href='#' onclick='document.getElementById(\"helpBtn\").click(); return false;' style='color: var(--neon-green); text-decoration: underline; font-weight: bold;'>👉 Click here for detailed info and example scenario.</a>"
         }
@@ -1238,13 +1243,11 @@ class TradingSystem {
             // Export to Excel
             this.exportToExcel();
 
-            // Reset Account Logic (Keep current balance as new start)
-            const newCapital = this.getCurrentBalance();
-            this.settings.initialCapital = newCapital;
-            this.settings.targetBaseCapital = newCapital;
-            this.saveSettings();
-
+            // Tam Sıfırlama (İlk Kullanıcı Ayarlarına Dönüş)
+            this.settings = this.getDefaultSettings();
             this.trades = [];
+
+            this.saveSettings();
             this.saveTrades();
 
             this.updateDashboard();
@@ -1252,7 +1255,8 @@ class TradingSystem {
             this.closeSettingsModal();
 
             setTimeout(() => {
-                alert('Tebrikler! Hesap başarıyla kapatıldı, verileriniz indirildi ve yeni döneminiz başlatıldı. 🚀');
+                alert('Hesap başarıyla kapatıldı, veriler indirildi ve sistem varsayılan ayarlara döndürüldü.');
+                window.location.reload();
             }, 500);
         } catch (error) {
             console.error('Export error:', error);
@@ -1300,19 +1304,102 @@ class TradingSystem {
         doc.text(fixTR(`Toplam Islem: ${this.trades.length}`), 140, 28);
         doc.text(fixTR(`Win Rate: %${this.getWinRate()}`), 140, 33);
         doc.text(fixTR(`Net Kar: ${this.formatCurrency(this.getNetProfit()).replace('₺', 'TL')}`), 140, 38);
-        doc.text(fixTR(`Max Drawdown: -%${this.calculateMaxDrawdown()}`), 140, 43);
+        doc.text(fixTR(`Max Drawdown: -%${Math.abs(this.calculateMaxDrawdown()).toFixed(2)}`), 140, 43);
         doc.text(fixTR(`Ortalama R: ${this.getAverageRRR()}R`), 140, 48);
 
-        // --- Chart Section ---
+        // --- Chart Section (Enhanced) ---
         try {
-            const canvas = document.getElementById('balanceChart');
-            if (canvas) {
-                const chartImg = canvas.toDataURL('image/png', 1.0);
-                // Add chart to PDF (x, y, width, height)
-                doc.addImage(chartImg, 'PNG', 14, 55, 182, 60);
+            const chartX = 14, chartY = 55, chartW = 182, chartH = 60, padding = 10;
+            doc.setFillColor(22, 27, 34); doc.rect(chartX, chartY, chartW, chartH, 'F');
+
+            const tradesAsc = [...this.trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            const dataPoints = [this.settings.initialCapital];
+            let currentBal = this.settings.initialCapital;
+            tradesAsc.forEach(t => { currentBal += t.profitLoss; dataPoints.push(currentBal); });
+
+            if (dataPoints.length > 0) {
+                const minVal = Math.min(...dataPoints);
+                const maxVal = Math.max(...dataPoints);
+                const range = maxVal - minVal || 1;
+
+                doc.setFontSize(8); doc.setTextColor(139, 148, 158); doc.setDrawColor(48, 54, 61); doc.setLineWidth(0.1);
+                const dl = (v, p) => {
+                    const y = (chartY + chartH - padding) - (p * (chartH - 2 * padding));
+                    doc.line(chartX, y, chartX + chartW, y);
+                    doc.text(this.formatCurrency(v).replace('₺', 'TL'), chartX + 2, y - 2);
+                };
+                dl(maxVal, 1); dl(minVal, 0); if (range > 0) dl(minVal + range / 2, 0.5);
+
+                if (dataPoints.length > 1) {
+                    doc.setDrawColor(0, 255, 136); doc.setLineWidth(0.8);
+                    for (let i = 0; i < dataPoints.length - 1; i++) {
+                        const x1 = chartX + (i / (dataPoints.length - 1)) * chartW;
+                        const y1 = (chartY + chartH - padding) - ((dataPoints[i] - minVal) / range) * (chartH - 2 * padding);
+                        const x2 = chartX + ((i + 1) / (dataPoints.length - 1)) * chartW;
+                        const y2 = (chartY + chartH - padding) - ((dataPoints[i + 1] - minVal) / range) * (chartH - 2 * padding);
+                        doc.line(x1, y1, x2, y2);
+                    }
+                    doc.setFillColor(0, 255, 136);
+                    doc.circle(chartX, (chartY + chartH - padding) - ((dataPoints[0] - minVal) / range) * (chartH - 2 * padding), 1.5, 'F');
+                    doc.circle(chartX + chartW, (chartY + chartH - padding) - ((dataPoints[dataPoints.length - 1] - minVal) / range) * (chartH - 2 * padding), 1.5, 'F');
+                }
             }
-        } catch (chartErr) {
-            console.warn('Could not add chart to PDF:', chartErr);
+            /*
+            // Draw Chart Background Box
+            doc.setFillColor(22, 27, 34); // #161b22 - Dark App Background
+            doc.rect(14, 55, 182, 60, 'F'); // x, y, w, h, style=Fill
+
+            // Get Balance Data (Ascending)
+            const tradesAsc = [...this.trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            // Start with initial capital
+            const balances = [this.settings.initialCapital];
+            let currentBal = this.settings.initialCapital;
+
+            tradesAsc.forEach(t => {
+                currentBal += t.profitLoss;
+                balances.push(currentBal);
+            });
+
+            // Draw Vector Line
+            if (balances.length > 1) {
+                const minVal = Math.min(...balances);
+                const maxVal = Math.max(...balances);
+                const range = maxVal - minVal || 1;
+
+                // Styling
+                doc.setDrawColor(0, 255, 136); // Neon Green
+                doc.setLineWidth(0.8);
+
+                const chartX = 14;
+                const chartY = 55;
+                const chartW = 182;
+                const chartH = 60;
+                const padding = 5;
+
+                for (let i = 0; i < balances.length - 1; i++) {
+                    // Calculate normalized coordinates
+                    const x1_norm = i / (balances.length - 1);
+                    const y1_norm = (balances[i] - minVal) / range;
+
+                    const x2_norm = (i + 1) / (balances.length - 1);
+                    const y2_norm = (balances[i + 1] - minVal) / range;
+
+                    // Map to PDF coordinates (Y is inverted in PDF/Canvas usually, but here 0 is top)
+                    // We want maxVal at top (chartY + padding)
+                    // minVal at bottom (chartY + chartH - padding)
+
+                    const x1 = chartX + (x1_norm * chartW);
+                    const y1 = (chartY + chartH - padding) - (y1_norm * (chartH - 2 * padding));
+
+                    const x2 = chartX + (x2_norm * chartW);
+                    const y2 = (chartY + chartH - padding) - (y2_norm * (chartH - 2 * padding));
+
+                    doc.line(x1, y1, x2, y2);
+                }
+            }
+            */
+        } catch (e) {
+            console.error('Vector Chart Error:', e);
         }
 
         const tableColumn = ["#", "Tarih", "Parite", "Yon", "Sonuc", "Kar/Zarar", "Bakiye", "Grafik Linki"];
@@ -1947,84 +2034,7 @@ class TradingSystem {
     // ===================================
 
     generateFeedback(trade) {
-        const consecutiveLosses = this.getConsecutiveLosses();
-        const beCount = this.getRecentBECount();
-        const netProfit = this.getNetProfit();
-        const targetProfit = this.getTargetProfit();
-
-        // Target Completed
-        if (netProfit >= targetProfit) {
-            return {
-                type: 'success',
-                icon: '🎉',
-                title: this.t('success_target_title'),
-                message: this.t('target_growth_msg', {
-                    targetGrowth: this.settings.targetGrowth,
-                    netProfit: this.formatCurrency(netProfit)
-                })
-            };
-        }
-
-        // Strategy Deviation Warnings (for win/be trades)
-        if ((trade.result === 'win' || trade.result === 'be') && trade.breakdown && !trade.breakdown.isMultiTP) {
-            const deviationWarnings = this.analyzeStrategyDeviation(
-                trade.breakdown.firstCloseRRR,
-                trade.breakdown.firstClosePercent
-            );
-
-            if (deviationWarnings.length > 0) {
-                return deviationWarnings[0]; // Return first warning
-            }
-        }
-
-        // Big Runner Caught
-        if (trade.result === 'win' && trade.breakdown) {
-            let maxRRR = 0;
-            if (trade.breakdown.isMultiTP) {
-                maxRRR = Math.max(...trade.breakdown.closes.map(c => c.rrr));
-            } else {
-                maxRRR = trade.breakdown.runnerCloseRRR;
-            }
-
-            if (maxRRR >= 4.0) {
-                const lossesCompensated = Math.floor(trade.profitLoss / this.getFixedRiskAmount());
-                return {
-                    type: 'success',
-                    icon: '🚀',
-                    title: this.t('super_runner_title'),
-                    message: this.t('super_runner_msg', {
-                        maxRRR: maxRRR.toFixed(1),
-                        lossesCompensated: lossesCompensated,
-                        profitLoss: this.formatCurrency(trade.profitLoss)
-                    })
-                };
-            }
-        }
-
-        // Consecutive Losses
-        if (consecutiveLosses >= 3) {
-            return {
-                type: 'warning',
-                icon: '⚠️',
-                title: this.t('discipline_title'),
-                message: this.t('consecutive_loss_msg', { consecutiveLosses: consecutiveLosses })
-            };
-        }
-
-        // Too Many BE/Low RRR
-        if (beCount >= 3 && this.getAverageRRR() < 2.5) {
-            return {
-                type: 'info',
-                icon: '💡',
-                title: this.t('increase_runner_title'),
-                message: this.t('be_shield_msg', {
-                    beCount: beCount,
-                    avgRRR: this.getAverageRRR().toFixed(2)
-                })
-            };
-        }
-
-        // Standard Feedback
+        // Feedback system disabled by user request.
         return null;
     }
 
@@ -2468,10 +2478,7 @@ class TradingSystem {
 
         section.style.display = 'block';
 
-        // Auto-hide after 15 seconds
-        setTimeout(() => {
-            section.style.display = 'none';
-        }, 15000);
+        section.style.display = 'block';
     }
 
     renderTradeHistory() {
@@ -2587,8 +2594,8 @@ class TradingSystem {
                 <div class="trade-item ${trade.result}" onclick="this.classList.toggle('expanded')">
                     <div class="trade-main-row">
                         <div class="trade-pair-info">
-                            <div class="trade-type-icon ${trade.direction}">
-                                ${isLong ? '🔼' : '🔻'}
+                            <div class="trade-type-icon ${trade.direction} ${trade.result}-icon">
+                                ${trade.result === 'be' ? '⚖️' : (trade.result === 'loss' ? '🛑' : (isLong ? '🔼' : '🔻'))}
                             </div>
                             <div class="pair-details">
                                 <div class="pair-name-row">
@@ -3283,12 +3290,17 @@ class TradingSystem {
             return el ? el.value : '';
         };
 
-        const result = getVal('tradeResult');
+        // SAĞLAM RESULT ALMA MANTIĞI (UI Öncelikli)
+        let result = getVal('tradeResult');
+        const activeResultBtn = document.querySelector('#resultSegment .segmented-btn.active');
+        if (activeResultBtn) {
+            result = activeResultBtn.getAttribute('data-value');
+        }
+
         const pair = getVal('tradePair').toUpperCase();
         const direction = getVal('tradeDirection');
         const notes = getVal('tradeNotes').trim();
         const isMultiTP = getVal('multiTPToggle') === 'yes';
-
         const chartUrl = getVal('chartUrl').trim();
 
         // Validation
@@ -3340,7 +3352,7 @@ class TradingSystem {
                         manualTotalProfit += profit;
                     }
 
-                    rows.push({ rrr, percent, profit }); // Store profit directly if manual
+                    rows.push({ rrr, percent, profit });
                     totalPercent += percent;
                 }
 
@@ -3350,24 +3362,21 @@ class TradingSystem {
                 }
 
                 if (isManualMode) {
-                    // Manual Mode Calculation
                     tradeData.profitLoss = manualTotalProfit;
                     tradeData.breakdown = {
-                        isMultiTP: true, // Treat layout as multiTP
+                        isMultiTP: true,
                         totalPercent: totalPercent,
                         closes: rows,
-                        firstCloseRRR: rows[0].rrr, // For backward compatibility
+                        firstCloseRRR: rows[0].rrr,
                         firstClosePercent: rows[0].percent
                     };
                 } else {
-                    // Standard Multi-TP Calculation
                     const calculation = this.calculateMultiTPResult(rows);
                     tradeData.profitLoss = calculation.total;
                     tradeData.breakdown = calculation.breakdown;
                 }
 
             } else {
-                // Standard Auto Mode Win
                 const firstCloseRRR = parseFloat(getVal('firstCloseRRR'));
                 const firstClosePercent = parseFloat(getVal('firstClosePercent'));
                 const runnerCloseRRR = parseFloat(getVal('runnerCloseRRR'));
@@ -3387,17 +3396,12 @@ class TradingSystem {
                 tradeData.breakdown = calculation.breakdown;
             }
         } else if (result === 'be') {
-            // Check manual mode
             const isManualMode = this.settings.manualMode;
 
             if (isManualMode) {
-                // Manual BE is just 0
                 tradeData.profitLoss = 0;
                 tradeData.breakdown = {
-                    firstClose: 0,
-                    firstCloseRRR: 0,
-                    firstClosePercent: 0,
-                    runnerClose: 0
+                    firstClose: 0, firstCloseRRR: 0, firstClosePercent: 0, runnerClose: 0
                 };
             } else {
                 const firstCloseRRR = parseFloat(getVal('beCloseRRR'));
@@ -3422,7 +3426,6 @@ class TradingSystem {
                     alert('Lütfen kayıp miktarını girin');
                     return;
                 }
-                // Ensure it's negative
                 tradeData.profitLoss = -Math.abs(lossAmount);
                 tradeData.breakdown = null;
             } else {
@@ -3433,20 +3436,16 @@ class TradingSystem {
         }
 
         // Add Trade
-        const trade = this.addTrade(tradeData);
-
-        // Update UI
+        this.addTrade(tradeData);
         this.refreshUI();
 
-        // Show Feedback
-        const feedback = this.generateFeedback(trade);
-        this.showFeedback(feedback);
+        // Feedback system disabled
 
         // FORM RESET & STAY IN POSITION
         const form = document.getElementById('tradeForm');
         form.reset();
 
-        // Reset Segmented UI visually
+        // Reset Visuals
         document.querySelectorAll('#directionSegment .segmented-btn').forEach(b => b.classList.remove('active'));
         const longBtn = document.querySelector('#directionSegment .segmented-btn[data-value="long"]');
         if (longBtn) longBtn.classList.add('active');
@@ -3455,13 +3454,11 @@ class TradingSystem {
         const winBtn = document.querySelector('#resultSegment .segmented-btn[data-value="win"]');
         if (winBtn) winBtn.classList.add('active');
 
-        // Ensure sub-inputs stay visible for 'win'
+        if (document.getElementById('tradeResult')) document.getElementById('tradeResult').value = 'win';
+
         this.toggleTradeInputs('win');
 
-        // Scroll to feedback if exists
-        if (feedback) {
-            document.getElementById('feedbackSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        // Scroll disabled
     }
 
     openSettingsModal() {
@@ -3927,6 +3924,8 @@ class TradingSystem {
             }
         }
     }
+
+    // Backup Reminder Removed
 }
 
 // ===================================
@@ -3940,7 +3939,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Runner R-Performance Tracker V2.1 initialized successfully!');
 
     // Initialize Welcome Modal
-    // tradingSystem.checkWelcomeModal(); // Disabled auto-open
+    tradingSystem.checkWelcomeModal();
+    // tradingSystem.checkBackupReminder(); // Removed
 
     // Welcome Modal Event Listeners
     const helpBtn = document.getElementById('helpBtn');
@@ -3962,55 +3962,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Close Account and Archive Button
     const closeAccountBtn = document.getElementById('closeAccountBtn');
     if (closeAccountBtn) {
-        closeAccountBtn.addEventListener('click', async function () {
-            if (!confirm('Hesabınızı kapatmak ve tüm verileri arşivlemek istediğinize emin misiniz?\n\nVerileriniz indirilecek ve ardından hesap sıfırlanacaktır.')) {
-                return;
-            }
-
-            try {
-                // Export data
-                const exportData = {
-                    exportDate: new Date().toISOString(),
-                    profile: tradingSystem.settings.archiveName || 'My Trading Data',
-                    settings: tradingSystem.settings,
-                    trades: tradingSystem.trades,
-                    totalTrades: tradingSystem.trades.length,
-                    netProfit: tradingSystem.getNetProfit(),
-                    winRate: tradingSystem.getWinRate()
-                };
-
-                // Create and download file
-                const dataStr = JSON.stringify(exportData, null, 2);
-                const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `trading-archive-${tradingSystem.settings.archiveName || 'data'}-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-
-                // Wait a bit for download to start, then confirm reset
-                setTimeout(() => {
-                    if (confirm('Arşiv indirildi. Şimdi hesabı sıfırlamak istiyor musunuz?')) {
-                        // Reset all trades
-                        tradingSystem.trades = [];
-                        tradingSystem.saveTrades();
-                        tradingSystem.refreshUI();
-
-                        // Close modal
-                        const modal = document.getElementById('settingsModal');
-                        if (modal) modal.style.display = 'none';
-
-                        alert('Hesap başarıyla sıfırlandı! Arşiv dosyanız indirildi.');
-                    }
-                }, 1000);
-
-            } catch (error) {
-                console.error('Export error:', error);
-                alert('Arşivleme sırasında bir hata oluştu: ' + error.message);
-            }
+        closeAccountBtn.addEventListener('click', function () {
+            tradingSystem.handleCloseAccount();
         });
     }
 
@@ -4058,5 +4011,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
+    }
+
+    // Backup & Restore Logic Removed
+
+    // ==========================================
+    // BUG FIX: Result Segment Logic Check
+    // ==========================================
+    const resultButtons = document.querySelectorAll('#resultSegment .segmented-btn');
+    const resultInput = document.getElementById('tradeResult');
+    if (resultButtons.length > 0 && resultInput) {
+        // Ensure click listeners are active and forcing update
+        resultButtons.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                // Remove active from all
+                resultButtons.forEach(b => b.classList.remove('active'));
+
+                // Add to clicked
+                this.classList.add('active');
+
+                // Force Update hidden input
+                const val = this.getAttribute('data-value');
+                resultInput.value = val;
+
+                // Trigger logic
+                if (window.tradingSystem) {
+                    window.tradingSystem.toggleTradeInputs(val);
+                }
+            });
+        });
+
+        // Initialize correct state on load
+        const activeBtn = document.querySelector('#resultSegment .segmented-btn.active');
+        if (activeBtn) {
+            const val = activeBtn.getAttribute('data-value');
+            resultInput.value = val;
+            // Delay slightly to ensure system is ready
+            setTimeout(() => {
+                if (window.tradingSystem) window.tradingSystem.toggleTradeInputs(val);
+            }, 500);
+        }
     }
 });
