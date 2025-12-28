@@ -3825,7 +3825,10 @@ class TradingSystem {
         const dailyPnL = {};
         this.trades.forEach(trade => {
             const date = new Date(trade.timestamp);
-            const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+            const year = date.getFullYear();
+            const month = String(date.getMonth()).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const dateKey = `${year}-${month}-${day}`;
             if (!dailyPnL[dateKey]) dailyPnL[dateKey] = 0;
             dailyPnL[dateKey] += trade.profitLoss;
         });
@@ -3880,7 +3883,9 @@ class TradingSystem {
 
         // Days
         for (let day = 1; day <= daysInMonth; day++) {
-            const dateKey = `${year}-${month}-${day}`;
+            const paddedMonth = String(month).padStart(2, '0');
+            const paddedDay = String(day).padStart(2, '0');
+            const dateKey = `${year}-${paddedMonth}-${paddedDay}`;
             const pnl = dailyPnL[dateKey] || 0;
             const isToday = todayKey === dateKey;
 

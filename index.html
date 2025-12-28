@@ -78,7 +78,7 @@
                 box-sizing: border-box !important;
                 border-left: none !important;
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
-                padding: 1.5rem 15px 0 15px !important;
+                padding: 1.5rem 20px 0 20px !important;
                 /* Left/Right Padding Added */
                 margin-top: 1rem !important;
             }
@@ -112,7 +112,8 @@
                 flex-shrink: 0;
                 margin-left: 10px;
                 white-space: nowrap;
-                margin-right: 5px !important;
+                padding-right: 5px !important;
+                /* Extra safety */
             }
 
             .stats-sidebar-inner {
@@ -129,20 +130,53 @@
                 justify-content: space-between !important;
                 align-items: center !important;
                 width: 100% !important;
+                gap: 8px;
+                /* Space between items */
             }
 
             .stats-pair {
-                font-size: 0.95rem !important;
+                font-size: clamp(0.8rem, 3vw, 0.95rem) !important;
+                /* Responsive */
                 flex: 1;
+                min-width: 0;
+                /* Allow shrinking */
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
 
             .stats-value {
-                font-size: 0.95rem !important;
+                font-size: clamp(0.8rem, 3vw, 0.95rem) !important;
+                /* Responsive */
                 font-weight: 600 !important;
                 text-align: right;
                 flex-shrink: 0;
-                margin-left: 10px;
+                margin-left: 5px;
                 white-space: nowrap;
+                max-width: 45%;
+                /* Prevent overflow */
+            }
+
+            /* Extra narrow devices (390px and below) */
+            @media (max-width: 400px) {
+                .stats-sidebar {
+                    padding: 1.5rem 12px 0 12px !important;
+                }
+
+                .stats-row {
+                    gap: 4px;
+                    padding: 8px 0 !important;
+                }
+
+                .stats-pair {
+                    font-size: 0.8rem !important;
+                }
+
+                .stats-value {
+                    font-size: 0.8rem !important;
+                    margin-left: 3px;
+                    max-width: 50%;
+                }
             }
 
             /* Trade List Item Fixes */
@@ -195,6 +229,25 @@
                 min-width: 0;
                 overflow: hidden;
             }
+        }
+
+        /* Calendar PnL Visual Fix */
+        .calendar-day.profit {
+            background-color: rgba(16, 185, 129, 0.15) !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        }
+
+        .calendar-day.loss {
+            background-color: rgba(239, 68, 68, 0.15) !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        }
+
+        .calendar-day.profit .day-profit {
+            color: #4ade80 !important;
+        }
+
+        .calendar-day.loss .day-profit {
+            color: #f87171 !important;
         }
 
         /* Ensure SEO text is hidden visually but readable by bots */
