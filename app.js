@@ -3921,6 +3921,12 @@ class TradingSystem {
 
             if (dontShowAgain && dontShowAgain.checked) {
                 localStorage.setItem('welcomeModalSeen', 'true');
+            } else {
+                // Kullanıcı kutuyu işaretlemese bile, 'Başla' butonuna bastıysa veya kapattıysa
+                // varsayılan olarak bir daha göstermeme eğilimindeyiz.
+                // Ancak kullanıcı 'x' ile kapattıysa belki sonra tekrar görmek isteyebilir.
+                // Fakat 'her siteyi açtığımda çıkıyor' şikayeti üzerine, bunu kalıcı olarak kapatıyoruz.
+                localStorage.setItem('welcomeModalSeen', 'true');
             }
         }
     }
