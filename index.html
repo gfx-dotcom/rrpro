@@ -48,9 +48,34 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Favicon -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "TradeJournal",
+      "url": "https://tradejournal.live/",
+      "description": "Risk/Ödül oranı hesaplama, performans takibi ve trading analizi için profesyonel günlük uygulaması.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "TRY"
+      }
+    }
+    </script>
 </head>
 
 <body>
+    <!-- SEO H1: Hidden visually but visible to search engines -->
+    <h1 class="sr-only" data-i18n="seo_h1_title">TradeJournal - Profesyonel Trading Performans ve Analiz Günlüğü</h1>
+
     <!-- Header -->
     <header class="header">
         <div class="container">
