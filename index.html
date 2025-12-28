@@ -45,23 +45,55 @@
                 flex-direction: column !important;
             }
 
+            /* Calendar Grid - Compact for Mobile */
+            .calendar-grid {
+                display: grid !important;
+                grid-template-columns: repeat(7, 1fr) !important;
+                gap: 2px !important;
+                /* Minimal gap */
+                width: 100% !important;
+                padding: 0 !important;
+            }
+
+            .calendar-wrapper {
+                padding: 0 5px !important;
+                /* Minimal side padding */
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
             /* Calendar Day Optimization */
             .calendar-day {
-                min-height: 55px !important;
+                min-height: 58px !important;
+                /* Compact height */
+                max-height: 58px !important;
                 padding: 2px !important;
+                /* Minimal padding */
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: flex-start !important;
+                box-sizing: border-box !important;
+                font-size: 0.65rem !important;
+                /* Smaller text */
+            }
+
+            .calendar-header-day {
+                font-size: 0.6rem !important;
+                /* Tiny headers */
+                padding: 4px 0 !important;
+                text-align: center;
             }
 
             .day-number {
-                font-size: 0.75rem !important;
+                font-size: 0.7rem !important;
                 margin-bottom: 2px !important;
-                padding-left: 2px;
+                padding-left: 1px;
+                font-weight: 500;
             }
 
             .day-profit {
-                font-size: 0.60rem !important;
+                font-size: 0.5rem !important;
+                /* Very small to fit */
                 font-weight: 700 !important;
                 width: 100%;
                 text-align: center;
@@ -127,7 +159,8 @@
             .stats-row {
                 padding: 10px 0 !important;
                 display: flex !important;
-                justify-content: space-between !important;
+                justify-content: flex-start !important;
+                /* Left-aligned compact */
                 align-items: center !important;
                 width: 100% !important;
                 gap: 8px;
@@ -135,47 +168,92 @@
             }
 
             .stats-pair {
-                font-size: clamp(0.8rem, 3vw, 0.95rem) !important;
-                /* Responsive */
-                flex: 1;
+                font-size: 0.75rem !important;
+                /* Smaller fixed size */
+                flex: 0 1 auto;
+                /* Don't grow */
+                max-width: 40%;
+                /* Limit pair width */
                 min-width: 0;
-                /* Allow shrinking */
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
 
             .stats-value {
-                font-size: clamp(0.8rem, 3vw, 0.95rem) !important;
-                /* Responsive */
-                font-weight: 600 !important;
-                text-align: right;
-                flex-shrink: 0;
-                margin-left: 5px;
+                font-size: 0.75rem !important;
+                /* Smaller fixed size */
+                font-weight: 700 !important;
+                /* Bolder */
+                text-align: left;
+                /* Left with pair */
+                flex: 1 1 auto;
+                /* Take remaining space */
+                margin-left: 8px;
+                /* Reduced spacing */
                 white-space: nowrap;
-                max-width: 45%;
-                /* Prevent overflow */
+                overflow: visible;
+                /* Allow full visibility */
             }
 
             /* Extra narrow devices (390px and below) */
             @media (max-width: 400px) {
                 .stats-sidebar {
-                    padding: 1.5rem 12px 0 12px !important;
+                    padding: 1.5rem 8px 0 8px !important;
+                    /* Even tighter */
                 }
 
                 .stats-row {
-                    gap: 4px;
+                    gap: 6px;
                     padding: 8px 0 !important;
                 }
 
                 .stats-pair {
-                    font-size: 0.8rem !important;
+                    font-size: 0.7rem !important;
+                    /* Even smaller */
+                    max-width: 35% !important;
+                    /* More constrained */
                 }
 
                 .stats-value {
-                    font-size: 0.8rem !important;
-                    margin-left: 3px;
-                    max-width: 50%;
+                    font-size: 0.7rem !important;
+                    /* Even smaller */
+                    font-weight: 800 !important;
+                    /* Extra bold */
+                    margin-left: 6px;
+                }
+
+                .calendar-grid {
+                    gap: 1px !important;
+                    /* Ultra minimal */
+                }
+
+                .calendar-wrapper {
+                    padding: 0 3px !important;
+                    /* Ultra tight */
+                }
+
+                .calendar-day {
+                    min-height: 52px !important;
+                    /* Extra compact */
+                    max-height: 52px !important;
+                    padding: 1px !important;
+                }
+
+                .day-number {
+                    font-size: 0.65rem !important;
+                    margin-bottom: 1px !important;
+                }
+
+                .day-profit {
+                    font-size: 0.45rem !important;
+                    /* Extra tiny */
+                    padding: 0;
+                }
+
+                .calendar-header-day {
+                    font-size: 0.55rem !important;
+                    padding: 3px 0 !important;
                 }
             }
 
@@ -233,21 +311,47 @@
 
         /* Calendar PnL Visual Fix */
         .calendar-day.profit {
-            background-color: rgba(16, 185, 129, 0.15) !important;
-            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+            background-color: rgba(16, 185, 129, 0.25) !important;
+            border: 1px solid rgba(16, 185, 129, 0.5) !important;
+            cursor: pointer;
         }
 
         .calendar-day.loss {
-            background-color: rgba(239, 68, 68, 0.15) !important;
-            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+            background-color: rgba(239, 68, 68, 0.25) !important;
+            border: 1px solid rgba(239, 68, 68, 0.5) !important;
+            cursor: pointer;
+        }
+
+        .calendar-day.profit:hover,
+        .calendar-day.profit:active {
+            background-color: rgba(16, 185, 129, 0.4) !important;
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
+
+        .calendar-day.loss:hover,
+        .calendar-day.loss:active {
+            background-color: rgba(239, 68, 68, 0.4) !important;
+            transform: scale(1.05);
+            transition: all 0.2s ease;
         }
 
         .calendar-day.profit .day-profit {
-            color: #4ade80 !important;
+            color: #34d399 !important;
+            font-weight: 700;
         }
 
         .calendar-day.loss .day-profit {
             color: #f87171 !important;
+            font-weight: 700;
+        }
+
+        /* Remove today highlight border */
+        .calendar-day.today {
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            /* Same as default */
+            box-shadow: none !important;
+            outline: none !important;
         }
 
         /* Ensure SEO text is hidden visually but readable by bots */

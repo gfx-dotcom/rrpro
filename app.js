@@ -3879,7 +3879,7 @@ class TradingSystem {
         }
 
         const today = new Date();
-        const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+        const todayKey = `${today.getFullYear()}-${String(today.getMonth()).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
         // Days
         for (let day = 1; day <= daysInMonth; day++) {
