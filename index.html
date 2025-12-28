@@ -45,19 +45,155 @@
                 flex-direction: column !important;
             }
 
+            /* Calendar Day Optimization */
+            .calendar-day {
+                min-height: 55px !important;
+                padding: 2px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-start !important;
+            }
+
+            .day-number {
+                font-size: 0.75rem !important;
+                margin-bottom: 2px !important;
+                padding-left: 2px;
+            }
+
+            .day-profit {
+                font-size: 0.60rem !important;
+                font-weight: 700 !important;
+                width: 100%;
+                text-align: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding: 1px 0;
+                line-height: 1.1;
+            }
+
+            /* Stats Optimization */
             .stats-sidebar {
                 width: 100% !important;
+                box-sizing: border-box !important;
                 border-left: none !important;
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
-                padding-left: 0 !important;
-                padding-top: 1.5rem !important;
+                padding: 1.5rem 15px 0 15px !important;
+                /* Left/Right Padding Added */
                 margin-top: 1rem !important;
             }
 
             .stats-sidebar-inner {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                display: flex !important;
+                flex-direction: column !important;
                 gap: 1.5rem;
+                width: 100% !important;
+            }
+
+            .stats-row {
+                padding: 10px 0 !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                width: 100% !important;
+            }
+
+            .stats-pair {
+                font-size: 0.95rem !important;
+                flex: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .stats-value {
+                font-size: 0.95rem !important;
+                font-weight: 600 !important;
+                text-align: right;
+                flex-shrink: 0;
+                margin-left: 10px;
+                white-space: nowrap;
+                margin-right: 5px !important;
+            }
+
+            .stats-sidebar-inner {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 1.5rem;
+                padding-right: 15px;
+                /* Prevent cutoff */
+            }
+
+            .stats-row {
+                padding: 10px 0 !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                width: 100% !important;
+            }
+
+            .stats-pair {
+                font-size: 0.95rem !important;
+                flex: 1;
+            }
+
+            .stats-value {
+                font-size: 0.95rem !important;
+                font-weight: 600 !important;
+                text-align: right;
+                flex-shrink: 0;
+                margin-left: 10px;
+                white-space: nowrap;
+            }
+
+            /* Trade List Item Fixes */
+            .trade-item {
+                padding: 12px 10px !important;
+                overflow: hidden !important;
+            }
+
+            .trade-main-row {
+                width: 100%;
+                justify-content: space-between;
+                gap: 5px;
+            }
+
+            .trade-right {
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                max-width: 50%;
+                /* Prevent taking too much space */
+            }
+
+            .delete-icon-btn {
+                position: relative !important;
+                margin-left: 2px !important;
+                min-width: 30px !important;
+                width: 30px !important;
+                height: 30px !important;
+                flex-shrink: 0 !important;
+                background: rgba(255, 77, 77, 0.1) !important;
+                border: 1px solid rgba(255, 77, 77, 0.2) !important;
+                border-radius: 6px !important;
+                display: flex !important;
+                align-items: center;
+                justify-content: center !important;
+                padding: 0 !important;
+                right: auto !important;
+                top: auto !important;
+            }
+
+            /* Adjust expansion chevron visibility */
+            .expand-chevron {
+                display: none !important;
+                /* Hide chevron on mobile to save space, clicking card still works */
+            }
+
+            .trade-pair-info {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
             }
         }
 
