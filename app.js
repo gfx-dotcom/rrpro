@@ -2487,6 +2487,62 @@ class TradingSystem {
         }, 50);
     }
 
+    // Calculate balance change percentage for a given period
+    getProgressByPeriod(period) {
+        if (this.trades.length === 0) return 0;
+
+        const now = new Date();
+        let startDate;
+
+        switch (period) {
+            case '1d':
+                // Today from midnight (00:00:00)
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+                break;
+            case '1w':
+                // 7 days ago from midnight
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7, 0, 0, 0);
+                break;
+            case '1m':
+                // 30 days ago from midnight
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30, 0, 0, 0);
+                break;
+            case '3m':
+                // 90 days ago from midnight
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 90, 0, 0, 0);
+                break;
+            case 'ytd':
+                startDate = new Date(now.getFullYear(), 0, 1, 0, 0, 0); // Jan 1 midnight
+                break;
+            case 'all':
+            default:
+                // All time - from first trade
+                const firstTrade = [...this.trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))[0];
+                if (!firstTrade) return 0;
+                startDate = new Date(firstTrade.timestamp);
+                break;
+        }
+
+        // Filter trades in this period
+        const periodTrades = this.trades.filter(t => new Date(t.timestamp) >= startDate);
+
+        if (periodTrades.length === 0) return 0;
+
+        // Starting balance: total P/L before period + initial capital
+        const tradesBeforePeriod = this.trades.filter(t => new Date(t.timestamp) < startDate);
+        const profitBeforePeriod = tradesBeforePeriod.reduce((sum, t) => sum + t.profitLoss, 0);
+        const startingBalance = this.settings.initialCapital + profitBeforePeriod;
+
+        // Current balance
+        const currentBalance = this.getCurrentBalance();
+
+        // Change percentage
+        if (startingBalance === 0) return 0;
+        const change = ((currentBalance - startingBalance) / startingBalance) * 100;
+
+        return change;
+    }
+
     updateCircularProgress(progress) {
         const circle = document.getElementById('circleProgress');
         const text = document.getElementById('circlePercent');
