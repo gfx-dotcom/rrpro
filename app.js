@@ -47,8 +47,8 @@ class TradingSystem {
             manualMode: true, // Manuel mod varsayılan açık
             accountMode: 'challenge',
             archiveName: 'RUNNER TRADER JOURNAL',
-            language: 'tr',
-            currency: 'TRY'
+            language: 'en',
+            currency: 'USD'
         };
     }
 
