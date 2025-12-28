@@ -1725,6 +1725,7 @@ body.readonly .layout-side {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.25rem;
     margin-bottom: 1.25rem;
+    align-items: start;
 }
 
 .form-group {
@@ -3537,5 +3538,36 @@ html body .feedback-card.success {
 
     .welcome-modal-body {
         padding: 20px;
+    }
+}
+
+/* Radio Group Mobile Style Fix */
+.radio-group {
+    display: flex;
+    gap: 10px;
+}
+
+.radio-label {
+    background: var(--bg-input);
+    border: 1px solid var(--border-glass);
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.radio-label:has(input:checked) {
+    border-color: var(--neon-green);
+    background: rgba(16, 185, 129, 0.05);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+}
+
+@media (max-width: 600px) {
+    .radio-group {
+        flex-direction: column;
     }
 }

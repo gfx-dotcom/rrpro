@@ -325,6 +325,10 @@ class TradingSystem {
             max_dd_sublabel: "Zirveden düşüş",
             backup_download: "⬇️ Yedeği İndir",
             backup_upload: "⬆️ Yedeği Yükle",
+            nav_home: "Ana Sayfa",
+            nav_journal: "Günlük",
+            nav_analysis: "Analiz",
+            nav_settings: "Ayarlar",
             welcome_dont_show_label: "Bir daha gösterme",
             target_base_help_text: "⚠️ Hesaplama <strong>Hedeflenen Sermaye'ye</strong> göre yapılır. Hedef Büyüme Oranı ile uyumlu olmalıdır.<br>Örn: 50K hesap ve %8 hedef için → Hedeflenen Sermaye: 54,000, Büyüme: %8.<br><br><a href='#' onclick='document.getElementById(\"helpBtn\").click(); return false;' style='color: var(--neon-green); text-decoration: underline; font-weight: bold;'>👉 Detaylı bilgi ve örnek senaryo için buraya tıklayın.</a>",
             seo_h1_title: "TradeJournal - Profesyonel Trading Performans ve Analiz Günlüğü"
@@ -593,6 +597,10 @@ class TradingSystem {
             max_dd_sublabel: "Max DD",
             backup_download: "⬇️ Download Backup",
             backup_upload: "⬆️ Upload Backup",
+            nav_home: "Home",
+            nav_journal: "Journal",
+            nav_analysis: "Analysis",
+            nav_settings: "Settings",
             welcome_dont_show_label: "Don't show again",
             target_base_help_text: "⚠️ Calculations are based on <strong>Target Base Capital</strong>. It must be consistent with the Target Growth Rate.<br>Ex: For 50K account & 8% target → Base Capital: 54,000, Growth: 8%.<br><br><a href='#' onclick='document.getElementById(\"helpBtn\").click(); return false;' style='color: var(--neon-green); text-decoration: underline; font-weight: bold;'>👉 Click here for detailed info and example scenario.</a>",
             seo_h1_title: "TradeJournal - Professional Trading Performance and Analysis Journal"
