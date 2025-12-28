@@ -39,6 +39,28 @@
     <meta property="twitter:image" content="https://tradejournal.live/assets/og-image.jpg">
     <link rel="stylesheet" href="styles.css">
     <style>
+        /* Mobile Fix for Calendar & Stats */
+        @media (max-width: 900px) {
+            .calendar-layout-container {
+                flex-direction: column !important;
+            }
+
+            .stats-sidebar {
+                width: 100% !important;
+                border-left: none !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                padding-left: 0 !important;
+                padding-top: 1.5rem !important;
+                margin-top: 1rem !important;
+            }
+
+            .stats-sidebar-inner {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
         /* Ensure SEO text is hidden visually but readable by bots */
         .sr-only {
             position: absolute;
@@ -58,6 +80,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -208,7 +231,7 @@
                     <!-- Hero Balance Section -->
                     <section class="hero-section centered" id="heroSection">
                         <div class="hero-content">
-                            <span class="hero-label">Toplam Bakiye</span>
+                            <span class="hero-label" data-i18n="total_balance">Toplam Bakiye</span>
                             <h2 class="hero-balance" id="heroTotalEquity">0 ₺</h2>
                             <div class="hero-stats">
                                 <span class="stats-trend positive">
@@ -225,12 +248,12 @@
 
                         <div class="hero-time-selectors">
                             <div class="time-selector-inner">
-                                <button class="time-btn" data-period="1d">1G</button>
-                                <button class="time-btn" data-period="1w">1H</button>
-                                <button class="time-btn active" data-period="1m">1A</button>
-                                <button class="time-btn" data-period="3m">3A</button>
-                                <button class="time-btn" data-period="ytd">YTD</button>
-                                <button class="time-btn" data-period="all">HEPSİ</button>
+                                <button class="time-btn" data-period="1d" data-i18n="period_1d">1G</button>
+                                <button class="time-btn" data-period="1w" data-i18n="period_1w">1H</button>
+                                <button class="time-btn active" data-period="1m" data-i18n="period_1m">1A</button>
+                                <button class="time-btn" data-period="3m" data-i18n="period_3m">3A</button>
+                                <button class="time-btn" data-period="ytd" data-i18n="period_ytd">YTD</button>
+                                <button class="time-btn" data-period="all" data-i18n="period_all">HEPSİ</button>
                             </div>
                         </div>
                     </section>
@@ -238,7 +261,7 @@
                     <!-- Progress Bar Section -->
                     <section class="progress-info-section">
                         <div class="completion-row">
-                            <span class="completion-label">Tamamlanma Oranı</span>
+                            <span class="completion-label" data-i18n="completion_rate">Tamamlanma Oranı</span>
                             <span class="completion-percent" id="mainCompletionPercent">0%</span>
                         </div>
                         <div class="main-progress-bar">

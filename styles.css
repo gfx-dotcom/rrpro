@@ -3571,3 +3571,21 @@ html body .feedback-card.success {
         flex-direction: column;
     }
 }
+
+/* Progress Bar Completed Effect */
+.progress-fill.completed {
+    background: linear-gradient(90deg, var(--neon-green), #34d399, var(--neon-green));
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+
+    100% {
+        background-position: -100% 0;
+    }
+}

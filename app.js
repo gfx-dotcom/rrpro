@@ -331,7 +331,19 @@ class TradingSystem {
             nav_settings: "Ayarlar",
             welcome_dont_show_label: "Bir daha gösterme",
             target_base_help_text: "⚠️ Hesaplama <strong>Hedeflenen Sermaye'ye</strong> göre yapılır. Hedef Büyüme Oranı ile uyumlu olmalıdır.<br>Örn: 50K hesap ve %8 hedef için → Hedeflenen Sermaye: 54,000, Büyüme: %8.<br><br><a href='#' onclick='document.getElementById(\"helpBtn\").click(); return false;' style='color: var(--neon-green); text-decoration: underline; font-weight: bold;'>👉 Detaylı bilgi ve örnek senaryo için buraya tıklayın.</a>",
-            seo_h1_title: "TradeJournal - Profesyonel Trading Performans ve Analiz Günlüğü"
+            seo_h1_title: "TradeJournal - Profesyonel Trading Performans ve Analiz Günlüğü",
+            total_balance: "Toplam Bakiye",
+            period_1d: "1G",
+            period_1w: "1H",
+            period_1m: "1A",
+            period_3m: "3A",
+            period_ytd: "YTD",
+            period_all: "HEPSİ",
+            completion_rate: "Tamamlanma Oranı",
+            chart_target_series: "Hedef",
+            chart_balance_series: "Bakiye",
+            chart_tooltip_starting: "Başlangıç",
+            trade_item_label: "İşlem {count}"
         },
         en: {
             current_balance: "Current Balance",
@@ -603,7 +615,19 @@ class TradingSystem {
             nav_settings: "Settings",
             welcome_dont_show_label: "Don't show again",
             target_base_help_text: "⚠️ Calculations are based on <strong>Target Base Capital</strong>. It must be consistent with the Target Growth Rate.<br>Ex: For 50K account & 8% target → Base Capital: 54,000, Growth: 8%.<br><br><a href='#' onclick='document.getElementById(\"helpBtn\").click(); return false;' style='color: var(--neon-green); text-decoration: underline; font-weight: bold;'>👉 Click here for detailed info and example scenario.</a>",
-            seo_h1_title: "TradeJournal - Professional Trading Performance and Analysis Journal"
+            seo_h1_title: "TradeJournal - Professional Trading Performance and Analysis Journal",
+            total_balance: "Total Balance",
+            period_1d: "1D",
+            period_1w: "1W",
+            period_1m: "1M",
+            period_3m: "3M",
+            period_ytd: "YTD",
+            period_all: "ALL",
+            completion_rate: "Completion Rate",
+            chart_target_series: "Target",
+            chart_balance_series: "Balance",
+            chart_tooltip_starting: "Starting",
+            trade_item_label: "Trade {count}"
         }
     };
 
@@ -1642,7 +1666,7 @@ class TradingSystem {
                 labels: [],
                 datasets: [
                     {
-                        label: 'Bakiye',
+                        label: this.t('chart_balance_series'),
                         data: [],
                         borderColor: accentColor,
                         backgroundColor: (context) => {
@@ -1666,7 +1690,7 @@ class TradingSystem {
                         order: 2
                     },
                     {
-                        label: 'Hedef',
+                        label: this.t('chart_target_series'),
                         data: [],
                         borderColor: isDark ? 'rgba(168, 85, 247, 0.5)' : 'rgba(124, 58, 237, 0.5)',
                         borderWidth: 2,
@@ -1739,15 +1763,16 @@ class TradingSystem {
         // Sort trades by date ascending for chart
         const sortedTrades = [...this.trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-        const labels = [this.t('starting'), ...sortedTrades.map((_, i) => this.t('trade_item_label', { count: i + 1 }))];
+        const labels = [this.t('chart_tooltip_starting'), ...sortedTrades.map((_, i) => this.t('trade_item_label', { count: i + 1 }))];
         const data = [this.settings.initialCapital, ...sortedTrades.map(t => t.balance)];
 
         this.chart.data.labels = labels;
-        this.chart.data.datasets[0].label = this.t('balance_text');
+        this.chart.data.datasets[0].label = this.t('chart_balance_series');
         this.chart.data.datasets[0].data = data;
 
         // Challenge Mode Target Line
         if (this.settings.accountMode === 'challenge') {
+            this.chart.data.datasets[1].label = this.t('chart_target_series');
             const targetBalance = this.getTargetProfit();
             const targetData = new Array(labels.length).fill(targetBalance);
             this.chart.data.datasets[1].data = targetData;
@@ -2225,6 +2250,42 @@ class TradingSystem {
         return (periodProfit / startingBalance) * 100;
     }
 
+    triggerMatrixEffect() {
+        if (typeof confetti === 'undefined') return;
+
+        const duration = 4000;
+        const end = Date.now() + duration;
+        // Matrix Green Palette
+        const colors = ['#00ff00', '#00cc00', '#10b981', '#34d399', '#059669'];
+
+        (function frame() {
+            confetti({
+                particleCount: 4,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: colors,
+                shapes: ['square'], // Matrix blocks
+                scalar: 1.3,
+                drift: 0,
+            });
+            confetti({
+                particleCount: 4,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: colors,
+                shapes: ['square'],
+                scalar: 1.3,
+                drift: 0,
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    }
+
     updateDashboard() {
         const netProfitValue = this.getNetProfit();
         const currentBalance = this.getCurrentBalance();
@@ -2247,7 +2308,15 @@ class TradingSystem {
 
         // Update period text
         const statsPeriod = document.getElementById('statsPeriod');
-        const periodTexts = {
+        const isEn = this.settings.language === 'en';
+        const periodTexts = isEn ? {
+            '1d': 'last 1 day',
+            '1w': 'last 1 week',
+            '1m': 'last 1 month',
+            '3m': 'last 3 months',
+            'ytd': 'this year',
+            'all': 'all time'
+        } : {
             '1d': 'son 1 günde',
             '1w': 'son 1 haftada',
             '1m': 'son 1 ayda',
@@ -2367,9 +2436,19 @@ class TradingSystem {
         if (mainProgressBarFill) {
             mainProgressBarFill.style.width = Math.min(100, Math.max(0, completionPercentage)) + '%';
             if (completionPercentage >= 100) {
-                mainProgressBarFill.style.background = 'var(--neon-red)';
-                mainProgressBarFill.style.boxShadow = '0 0 15px var(--neon-red-glow)';
+                mainProgressBarFill.classList.add('completed');
+                mainProgressBarFill.style.background = ''; // Allow CSS gradient to take over
+                mainProgressBarFill.style.boxShadow = '';
+
+                // Trigger Matrix Effect if not already celebrated
+                if (!this.hasCelebrated) {
+                    this.triggerMatrixEffect();
+                    this.hasCelebrated = true;
+                    this.showNotification(this.settings.language === 'en' ? 'CONGRATULATIONS! Target Reached! 🚀' : 'TEBRİKLER! Hedefe Ulaştınız! 🚀', 'success');
+                }
             } else {
+                mainProgressBarFill.classList.remove('completed');
+                this.hasCelebrated = false; // Reset
                 mainProgressBarFill.style.background = 'linear-gradient(90deg, var(--neon-green-glow), var(--neon-green))';
                 mainProgressBarFill.style.boxShadow = '0 0 15px var(--neon-green-glow)';
             }
@@ -2377,7 +2456,7 @@ class TradingSystem {
         const mainCompletionPercent = document.getElementById('mainCompletionPercent');
         if (mainCompletionPercent) {
             mainCompletionPercent.textContent = completionPercentage.toFixed(1) + '%';
-            if (completionPercentage >= 100) mainCompletionPercent.style.color = 'var(--neon-red)';
+            if (completionPercentage >= 100) mainCompletionPercent.style.color = 'var(--neon-green)';
             else mainCompletionPercent.style.color = 'inherit';
         }
 
