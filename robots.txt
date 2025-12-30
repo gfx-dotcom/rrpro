@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /blog/
+Allow: /blog.html
+
+Sitemap: https://tradejournal.live/sitemap.xml
+
+# Prevent indexing of user data
+Disallow: /snapshots/
+Disallow: /shared/

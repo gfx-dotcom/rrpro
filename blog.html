@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Blog - Expert Tips & Strategies | TradeJournal</title>
+    <meta name="description"
+        content="Learn trading strategies, risk management, technical analysis, and trading psychology from expert traders. Free educational content for forex and crypto traders.">
+    <meta name="keywords"
+        content="trading blog, forex trading tips, trading strategies, risk management, technical analysis, trading psychology">
+    <link rel="canonical" href="https://tradejournal.live/blog.html">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Trading Blog - Expert Tips & Strategies">
+    <meta property="og:description" content="Free trading education: strategies, risk management, and expert insights.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tradejournal.live/blog.html">
+
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .blog-hero {
+            text-align: center;
+            padding: 4rem 1rem 3rem;
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.05), rgba(52, 211, 153, 0.05));
+            border-radius: 20px;
+            margin-bottom: 3rem;
+        }
+
+        .blog-hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #58a6ff, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .blog-hero p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .blog-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(88, 166, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(88, 166, 255, 0.1);
+        }
+
+        .blog-card-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.2), rgba(52, 211, 153, 0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .blog-card-content {
+            padding: 1.5rem;
+        }
+
+        .blog-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(88, 166, 255, 0.15);
+            color: #58a6ff;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .blog-card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-main);
+        }
+
+        .blog-card p {
+            opacity: 0.7;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .blog-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(88, 166, 255, 0.1);
+            border: 1px solid rgba(88, 166, 255, 0.3);
+            border-radius: 12px;
+            color: #58a6ff;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-home:hover {
+            background: rgba(88, 166, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="main-container">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 2rem 1rem;">
+
+            <a href="index.html" class="back-home">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back to Journal
+            </a>
+
+            <div class="blog-hero">
+                <h1>📚 Trading Education Hub</h1>
+                <p>Master the markets with expert insights, proven strategies, and actionable trading tips</p>
+            </div>
+
+            <div class="blog-grid">
+                <!-- Article 1 -->
+                <div class="blog-card" onclick="window.location.href='blog/risk-management-guide.html'">
+                    <div class="blog-card-image">📊</div>
+                    <div class="blog-card-content">
+                        <span class="blog-tag">Risk Management</span>
+                        <h2>The 2% Rule: Complete Risk Management Guide</h2>
+                        <p>Learn how professional traders protect their capital using the proven 2% rule. Never risk
+                            more than you can afford to lose.</p>
+                        <div class="blog-meta">
+                            <span>5 min read</span>
+                            <span>•</span>
+                            <span>Beginner Friendly</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Article 2 -->
+                <div class="blog-card" onclick="window.location.href='blog/trading-psychology.html'">
+                    <div class="blog-card-image">🧠</div>
+                    <div class="blog-card-content">
+                        <span class="blog-tag">Psychology</span>
+                        <h2>Trading Psychology: Mastering Your Emotions</h2>
+                        <p>Discover how to overcome fear, greed, and FOMO. Build the mental discipline required for
+                            consistent profitability.</p>
+                        <div class="blog-meta">
+                            <span>7 min read</span>
+                            <span>•</span>
+                            <span>Essential</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Article 3 -->
+                <div class="blog-card" onclick="window.location.href='blog/trading-journal-benefits.html'">
+                    <div class="blog-card-image">📝</div>
+                    <div class="blog-card-content">
+                        <span class="blog-tag">Journal</span>
+                        <h2>Why Every Trader Needs a Trading Journal</h2>
+                        <p>Track your trades, identify patterns, and improve performance. Learn the 7 golden rules of
+                            journaling.</p>
+                        <div class="blog-meta">
+                            <span>6 min read</span>
+                            <span>•</span>
+                            <span>Must Read</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Article 4 -->
+                <div class="blog-card" onclick="window.location.href='blog/support-resistance.html'">
+                    <div class="blog-card-image">📈</div>
+                    <div class="blog-card-content">
+                        <span class="blog-tag">Technical Analysis</span>
+                        <h2>Support & Resistance: The Ultimate Guide</h2>
+                        <p>Master the foundation of technical analysis. Learn how to identify key price levels and trade
+                            them profitably.</p>
+                        <div class="blog-meta">
+                            <span>8 min read</span>
+                            <span>•</span>
+                            <span>Intermediate</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Article 5 -->
+                <div class="blog-card" onclick="window.location.href='blog/fibonacci-retracement.html'">
+                    <div class="blog-card-image">🔢</div>
+                    <div class="blog-card-content">
+                        <span class="blog-tag">Technical Analysis</span>
+                        <h2>Fibonacci Retracement: Complete Tutorial</h2>
+                        <p>Use Fibonacci levels to predict price retracements and find perfect entry points with
+                            mathematical precision.</p>
+                        <div class="blog-meta">
+                            <span>9 min read</span>
+                            <span>•</span>
+                            <span>Advanced</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Article 6 -->
+                <div class="blog-card" onclick="window.location.href='blog/win-rate-vs-risk-reward.html'">
+                    <div class="blog-card-image">🎯</div>
+                    <div class="blog-card-content">
+                        <span class="blog-tag">Strategy</span>
+                        <h2>Win Rate vs Risk-Reward: What Matters More?</h2>
+                        <p>Understand the mathematics of profitable trading. Why a 40% win rate can still make you rich.
+                        </p>
+                        <div class="blog-meta">
+                            <span>6 min read</span>
+                            <span>•</span>
+                            <span>Eye-Opening</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 3rem 1rem; opacity: 0.5; font-size: 0.9rem;">
+        <p>© 2025 TradeJournal. Professional Trading Performance Tracker.</p>
+    </footer>
+</body>
+
+</html>
