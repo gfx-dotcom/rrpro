@@ -4,6 +4,30 @@
    =================================== 
 */
 
+/* CRITICAL: Prevent Horizontal Scroll on Mobile */
+@media (max-width: 900px) {
+
+    html,
+    body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        position: relative !important;
+    }
+
+    body * {
+        max-width: 100% !important;
+    }
+
+    .container,
+    .main-container,
+    .dashboard,
+    canvas,
+    img {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+}
+
 /* Pulsing Glow Animation for Help Button */
 @keyframes pulse-glow {
     0% {
