@@ -273,6 +273,15 @@ class TradingSystem {
             close_account_title: "📂 Hesabı Kapat ve Arşivle",
             close_account_desc: "Mevcut challenge veya serbest dönemi sonlandırın. Tüm işlem geçmişiniz profesyonel formatta PDF ve Excel olarak dışa aktarılır, ardından hesabınız yeni bir dönem için sıfırlanır.",
             close_account_btn: "🏆 Hesabı Kapat ve Verileri İndir",
+            close_account_confirm: "DİKKAT: Mevcut dönemi kapatmak üzeresiniz.\n\n1. Tüm işlemleriniz PDF ve EXCEL olarak indirilecek.\n2. İşlem geçmişiniz sıfırlanacak.\n3. Mevcut bakiyeniz yeni dönemin başlangıç sermayesi olacak.\n\nOnaylıyor musunuz?",
+            restore_backup_confirm: "⚠️ DİKKAT!\n\nMevcut tüm verileriniz (trade'ler, ayarlar, profiller) yedeğe göre değiştirilecektir.\n\nYedek Tarihi: {date}\n\nDevam etmek istiyor musunuz?",
+            restore_backup_success: "✅ Yedek başarıyla geri yüklendi! Tüm trade'ler, ayarlar ve profiller geri geldi. Sayfa yenileniyor...",
+            restore_backup_error: "❌ Yedek dosyası geçersiz veya bozuk! Geri yükleme başarısız.",
+            backup_restore_title: "Yedekleme & Geri Yükleme",
+            backup_restore_desc: "Tüm trade verilerinizi, ayarlarınızı ve profillerinizi JSON dosyası olarak yedekleyip geri yükleyebilirsiniz.",
+            backup_download: "Yedeği İndir (JSON)",
+            backup_restore: "Yedeği Geri Yükle",
+            reset_settings: "Varsayılan Ayarlar",
             snapshot_warning: "⚠️ Bu link anlık görüntüdür. Yeni trade eklediğinizde veya sildiğinizde tekrar 'Paylaş' butonuna basarak yeni link oluşturmalısınız.",
             generated_new_link: "Yeni link oluşturuldu!",
             calc_modal_title: "🧮 Kâr Hesaplayıcı",
@@ -627,7 +636,18 @@ class TradingSystem {
             chart_target_series: "Target",
             chart_balance_series: "Balance",
             chart_tooltip_starting: "Starting",
-            trade_item_label: "Trade {count}"
+            trade_item_label: "Trade {count}",
+            backup_restore_title: "Backup & Restore",
+            backup_restore_desc: "You can backup and restore all your trade data, settings, and profiles as JSON file.",
+            backup_download: "Download Backup (JSON)",
+            backup_restore: "Restore Backup",
+            reset_settings: "Default Settings",
+            close_account_desc: "Resets the account and downloads the journal as Excel/PDF.",
+            close_account: "Close Account & Archive",
+            close_account_confirm: "WARNING: You are about to close the current period.\n\n1. All your trades will be downloaded as PDF and EXCEL.\n2. Your trade history will be reset.\n3. Your current balance will become the initial capital for the new period.\n\nDo you confirm?",
+            restore_backup_confirm: "⚠️ WARNING!\n\nAll your current data (trades, settings, profiles) will be replaced with the backup data.\n\nBackup Date: {date}\n\nDo you want to continue?",
+            restore_backup_success: "✅ Backup restored successfully! All trades, settings, and profiles are back. Page reloading...",
+            restore_backup_error: "❌ Backup file is invalid or corrupted! Restore failed."
         }
     };
 
@@ -1264,38 +1284,49 @@ class TradingSystem {
             return;
         }
 
-        const confirmReset = confirm('DİKKAT: Mevcut dönemi kapatmak üzeresiniz.\n\n1. Tüm işlemleriniz PDF ve EXCEL olarak indirilecek.\n2. İşlem geçmişiniz sıfırlanacak.\n3. Mevcut bakiyeniz yeni dönemin başlangıç sermayesi olacak.\n\nOnaylıyor musunuz?');
+        const confirmReset = confirm(this.t('close_account_confirm'));
 
         if (!confirmReset) return;
 
         try {
-            this.showNotification('Dosyalar hazırlanıyor...', 'info');
+            this.showNotification('PDF indiriliyor...', 'info');
 
-            // Export to PDF
+            // Export to PDF first
             this.exportToPDF();
 
-            // Export to Excel
-            this.exportToExcel();
-
-            // Tam Sıfırlama (İlk Kullanıcı Ayarlarına Dönüş)
-            this.settings = this.getDefaultSettings();
-            this.trades = [];
-
-            this.saveSettings();
-            this.saveTrades();
-
-            this.updateDashboard();
-            this.renderTradeHistory();
-            this.closeSettingsModal();
-
+            // Wait 2.5 seconds before Excel export to avoid browser blocking
             setTimeout(() => {
-                alert('Hesap başarıyla kapatıldı, veriler indirildi ve sistem varsayılan ayarlara döndürüldü.');
-                window.location.reload();
-            }, 500);
+                this.showNotification('Excel indiriliyor...', 'info');
+                this.exportToExcel();
+
+                // Complete reset after both exports (wait another second)
+                setTimeout(() => {
+                    this.completeAccountReset();
+                }, 1000);
+            }, 2500);
+
         } catch (error) {
             console.error('Export error:', error);
             this.showNotification('Hata oluştu, veriler dışa aktarılamadı.', 'error');
         }
+    }
+
+    completeAccountReset() {
+        // Complete Account Reset (Back to Initial Settings)
+        this.settings = this.getDefaultSettings();
+        this.trades = [];
+
+        this.saveSettings();
+        this.saveTrades();
+
+        this.updateDashboard();
+        this.renderTradeHistory();
+        this.closeSettingsModal();
+
+        // Reload page to reflect changes
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
     }
 
     // Export to PDF
@@ -1316,6 +1347,10 @@ class TradingSystem {
                 .replace(/₺/g, 'TL');
         };
 
+        // Language support
+        const isEN = this.settings.language === 'en';
+        const dateLocale = isEN ? 'en-US' : 'tr-TR';
+
         // Title and Header
         doc.setFontSize(22);
         doc.setTextColor(88, 166, 255);
@@ -1323,23 +1358,23 @@ class TradingSystem {
 
         doc.setFontSize(10);
         doc.setTextColor(100);
-        doc.text(fixTR(`Arsiv Tarihi: ${new Date().toLocaleString('tr-TR')}`), 14, 28);
-        doc.text(fixTR(`Mod: ${this.settings.accountMode === 'challenge' ? 'Challenge' : 'Serbest'}`), 14, 33);
-        doc.text(fixTR(`Baslangic Sermayesi: ${this.formatCurrency(this.settings.initialCapital).replace('₺', 'TL')}`), 14, 38);
-        doc.text(fixTR(`Final Bakiyesi: ${this.formatCurrency(this.getCurrentBalance()).replace('₺', 'TL')}`), 14, 43);
+        doc.text(fixTR(isEN ? `Archive Date: ${new Date().toLocaleString(dateLocale)}` : `Arsiv Tarihi: ${new Date().toLocaleString(dateLocale)}`), 14, 28);
+        doc.text(fixTR(isEN ? `Mode: ${this.settings.accountMode === 'challenge' ? 'Challenge' : 'Free'}` : `Mod: ${this.settings.accountMode === 'challenge' ? 'Challenge' : 'Serbest'}`), 14, 33);
+        doc.text(fixTR(isEN ? `Initial Capital: ${this.formatCurrency(this.settings.initialCapital).replace('₺', 'TL')}` : `Baslangic Sermayesi: ${this.formatCurrency(this.settings.initialCapital).replace('₺', 'TL')}`), 14, 38);
+        doc.text(fixTR(isEN ? `Final Balance: ${this.formatCurrency(this.getCurrentBalance()).replace('₺', 'TL')}` : `Final Bakiyesi: ${this.formatCurrency(this.getCurrentBalance()).replace('₺', 'TL')}`), 14, 43);
 
         // --- Performance Statistics Section ---
         doc.setFontSize(14);
         doc.setTextColor(88, 166, 255);
-        doc.text(fixTR('Performans Ozeti'), 140, 20);
+        doc.text(fixTR(isEN ? 'Performance Summary' : 'Performans Ozeti'), 140, 20);
 
         doc.setFontSize(9);
         doc.setTextColor(80);
-        doc.text(fixTR(`Toplam Islem: ${this.trades.length}`), 140, 28);
+        doc.text(fixTR(isEN ? `Total Trades: ${this.trades.length}` : `Toplam Islem: ${this.trades.length}`), 140, 28);
         doc.text(fixTR(`Win Rate: %${this.getWinRate()}`), 140, 33);
-        doc.text(fixTR(`Net Kar: ${this.formatCurrency(this.getNetProfit()).replace('₺', 'TL')}`), 140, 38);
+        doc.text(fixTR(isEN ? `Net Profit: ${this.formatCurrency(this.getNetProfit()).replace('₺', 'TL')}` : `Net Kar: ${this.formatCurrency(this.getNetProfit()).replace('₺', 'TL')}`), 140, 38);
         doc.text(fixTR(`Max Drawdown: -%${Math.abs(this.calculateMaxDrawdown()).toFixed(2)}`), 140, 43);
-        doc.text(fixTR(`Ortalama R: ${this.getAverageRRR()}R`), 140, 48);
+        doc.text(fixTR(isEN ? `Average R: ${this.getAverageRRR()}R` : `Ortalama R: ${this.getAverageRRR()}R`), 140, 48);
 
         // --- Chart Section (Enhanced) ---
         try {
@@ -1382,52 +1417,52 @@ class TradingSystem {
             // Draw Chart Background Box
             doc.setFillColor(22, 27, 34); // #161b22 - Dark App Background
             doc.rect(14, 55, 182, 60, 'F'); // x, y, w, h, style=Fill
-
+    
             // Get Balance Data (Ascending)
             const tradesAsc = [...this.trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             // Start with initial capital
             const balances = [this.settings.initialCapital];
             let currentBal = this.settings.initialCapital;
-
+    
             tradesAsc.forEach(t => {
                 currentBal += t.profitLoss;
                 balances.push(currentBal);
             });
-
+    
             // Draw Vector Line
             if (balances.length > 1) {
                 const minVal = Math.min(...balances);
                 const maxVal = Math.max(...balances);
                 const range = maxVal - minVal || 1;
-
+    
                 // Styling
                 doc.setDrawColor(0, 255, 136); // Neon Green
                 doc.setLineWidth(0.8);
-
+    
                 const chartX = 14;
                 const chartY = 55;
                 const chartW = 182;
                 const chartH = 60;
                 const padding = 5;
-
+    
                 for (let i = 0; i < balances.length - 1; i++) {
                     // Calculate normalized coordinates
                     const x1_norm = i / (balances.length - 1);
                     const y1_norm = (balances[i] - minVal) / range;
-
+    
                     const x2_norm = (i + 1) / (balances.length - 1);
                     const y2_norm = (balances[i + 1] - minVal) / range;
-
+    
                     // Map to PDF coordinates (Y is inverted in PDF/Canvas usually, but here 0 is top)
                     // We want maxVal at top (chartY + padding)
                     // minVal at bottom (chartY + chartH - padding)
-
+    
                     const x1 = chartX + (x1_norm * chartW);
                     const y1 = (chartY + chartH - padding) - (y1_norm * (chartH - 2 * padding));
-
+    
                     const x2 = chartX + (x2_norm * chartW);
                     const y2 = (chartY + chartH - padding) - (y2_norm * (chartH - 2 * padding));
-
+    
                     doc.line(x1, y1, x2, y2);
                 }
             }
@@ -1436,19 +1471,31 @@ class TradingSystem {
             console.error('Vector Chart Error:', e);
         }
 
-        const tableColumn = ["#", "Tarih", "Parite", "Yon", "Sonuc", "Kar/Zarar", "Bakiye", "Grafik Linki"];
+        const tableColumn = isEN
+            ? ["#", "Date", "Pair", "Direction", "Result", "P/L", "Balance", "Chart Link"]
+            : ["#", "Tarih", "Parite", "Yon", "Sonuc", "Kar/Zarar", "Bakiye", "Grafik Linki"];
         const tableRows = [];
 
         // Sort descending (newest first)
         const sorted = [...this.trades].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
         sorted.forEach((t, index) => {
+            // Translate direction and result if English
+            let direction = (t.direction || "-").toUpperCase();
+            let result = t.result.toUpperCase();
+
+            if (!isEN) {
+                // Keep Turkish (already saved in Turkish)
+                direction = direction;
+                result = result;
+            }
+
             tableRows.push([
                 sorted.length - index,
                 this.formatDate(t.timestamp),
                 fixTR(t.pair || "-"),
-                fixTR((t.direction || "-").toUpperCase()),
-                fixTR(t.result.toUpperCase()),
+                fixTR(direction),
+                fixTR(result),
                 fixTR(this.formatCurrency(t.profitLoss).replace('₺', 'TL')),
                 fixTR(this.formatCurrency(t.balance).replace('₺', 'TL')),
                 t.chartUrl || "-"
@@ -1487,6 +1534,10 @@ class TradingSystem {
 
     // Export to Excel
     exportToExcel() {
+        // Language support
+        const isEN = this.settings.language === 'en';
+        const dateLocale = isEN ? 'en-US' : 'tr-TR';
+
         // Sort descending: newest first.
         // We use a combination of timestamp and original index to ensure "last added" is always at the top
         const tradesWithIndex = this.trades.map((t, i) => ({ ...t, originalIndex: i }));
@@ -1498,15 +1549,15 @@ class TradingSystem {
         });
 
         const rows = sorted.map((t, index) => ({
-            "No": sorted.length - index,
-            "Tarih": this.formatDate(t.timestamp),
-            "Parite": t.pair || "-",
-            "Yön": (t.direction || "-").toUpperCase(),
-            "Sonuç": t.result.toUpperCase(),
-            "Kar/Zarar": t.profitLoss,
-            "Bakiye": t.balance,
-            "Notlar": t.notes || "",
-            "Grafik Linki": t.chartUrl || "" // Just providing the URL string is often more reliable for auto-linking
+            [isEN ? "No" : "No"]: sorted.length - index,
+            [isEN ? "Date" : "Tarih"]: this.formatDate(t.timestamp),
+            [isEN ? "Pair" : "Parite"]: t.pair || "-",
+            [isEN ? "Direction" : "Yön"]: (t.direction || "-").toUpperCase(),
+            [isEN ? "Result" : "Sonuç"]: t.result.toUpperCase(),
+            [isEN ? "P/L" : "Kar/Zarar"]: t.profitLoss,
+            [isEN ? "Balance" : "Bakiye"]: t.balance,
+            [isEN ? "Notes" : "Notlar"]: t.notes || "",
+            [isEN ? "Chart Link" : "Grafik Linki"]: t.chartUrl || ""
         }));
 
         const worksheet = XLSX.utils.json_to_sheet(rows);
@@ -1514,32 +1565,32 @@ class TradingSystem {
         // Add actual hyperlinks to the cells so they are clickable
         const range = XLSX.utils.decode_range(worksheet['!ref']);
         for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-            const cellAddress = XLSX.utils.encode_cell({ r: R, c: 8 }); // Column I (index 8) is "Grafik Linki"
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: 8 }); // Column I (index 8) is chart link column
             const cell = worksheet[cellAddress];
             if (cell && cell.v && cell.v.startsWith('http')) {
-                cell.l = { Target: cell.v, Tooltip: "Grafiği Aç" };
+                cell.l = { Target: cell.v, Tooltip: isEN ? "Open Chart" : "Grafiği Aç" };
             }
         }
 
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Islem Gecmisi");
+        XLSX.utils.book_append_sheet(workbook, worksheet, isEN ? "Trade History" : "Islem Gecmisi");
 
         // --- Add Statistics Summary Sheet ---
         const statsData = [
-            [(this.settings.archiveName || "PERFORMANS OZETI").toUpperCase(), ""],
-            ["Arsiv Tarihi", new Date().toLocaleString('tr-TR')],
-            ["Hesap Modu", this.settings.accountMode.toUpperCase()],
+            [(this.settings.archiveName || (isEN ? "PERFORMANCE SUMMARY" : "PERFORMANS OZETI")).toUpperCase(), ""],
+            [isEN ? "Archive Date" : "Arsiv Tarihi", new Date().toLocaleString(dateLocale)],
+            [isEN ? "Account Mode" : "Hesap Modu", this.settings.accountMode.toUpperCase()],
             ["", ""],
-            ["Baslangic Sermayesi", this.settings.initialCapital],
-            ["Final Bakiyesi", this.getCurrentBalance()],
-            ["Net Kar/Zarar", this.getNetProfit()],
+            [isEN ? "Initial Capital" : "Baslangic Sermayesi", this.settings.initialCapital],
+            [isEN ? "Final Balance" : "Final Bakiyesi", this.getCurrentBalance()],
+            [isEN ? "Net P/L" : "Net Kar/Zarar", this.getNetProfit()],
             ["Win Rate", `%${this.getWinRate()}`],
             ["Max Drawdown", `%${this.calculateMaxDrawdown()}`],
-            ["Ortalama R", this.getAverageRRR()],
-            ["Toplam Islem", this.trades.length]
+            [isEN ? "Average R" : "Ortalama R", this.getAverageRRR()],
+            [isEN ? "Total Trades" : "Toplam Islem", this.trades.length]
         ];
         const statsSheet = XLSX.utils.aoa_to_sheet(statsData);
-        XLSX.utils.book_append_sheet(workbook, statsSheet, "Ozet");
+        XLSX.utils.book_append_sheet(workbook, statsSheet, isEN ? "Summary" : "Ozet");
 
         worksheet['!cols'] = [
             { wch: 5 }, { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
@@ -2559,6 +2610,120 @@ class TradingSystem {
         else text.style.fill = 'var(--text-main)';
     }
 
+    // ==========================================
+    // BACKUP & RESTORE SYSTEM
+    // ==========================================
+
+    backupAllData() {
+        try {
+            const backup = {
+                version: '2.1',
+                timestamp: new Date().toISOString(),
+                data: {
+                    activeProfileId: localStorage.getItem('activeProfileId'),
+                    profiles: localStorage.getItem('runnerProfiles'),
+                    settings: {},
+                    trades: {}
+                }
+            };
+
+            const profiles = JSON.parse(localStorage.getItem('runnerProfiles') || '[]');
+
+            profiles.forEach(profile => {
+                const settingsKey = `runnerSettings_${profile.id}`;
+                const tradesKey = `runnerTrades_${profile.id}`;
+
+                if (localStorage.getItem(settingsKey)) {
+                    backup.data.settings[profile.id] = localStorage.getItem(settingsKey);
+                }
+
+                if (localStorage.getItem(tradesKey)) {
+                    backup.data.trades[profile.id] = localStorage.getItem(tradesKey);
+                }
+            });
+
+            const jsonString = JSON.stringify(backup, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `TradeJournal_Backup_${new Date().toISOString().split('T')[0]}.json`;
+
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            this.showNotification('✅ Yedek başarıyla indirildi!', 'success');
+
+        } catch (error) {
+            console.error('Backup error:', error);
+            this.showNotification('❌ Yedekleme sırasında hata oluştu!', 'error');
+        }
+    }
+
+    restoreAllData(file) {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            try {
+                const backup = JSON.parse(e.target.result);
+
+                if (!backup.version || !backup.data) {
+                    throw new Error('Invalid backup file format');
+                }
+
+                // Get current language (use browser language if settings not loaded yet)
+                const currentLang = this.settings?.language ||
+                    (navigator.language.startsWith('tr') ? 'tr' : 'en');
+
+                const backupDate = new Date(backup.timestamp).toLocaleString(
+                    currentLang === 'en' ? 'en-US' : 'tr-TR'
+                );
+
+                const confirmed = confirm(
+                    this.t('restore_backup_confirm', { date: backupDate })
+                );
+
+                if (!confirmed) return;
+
+                localStorage.clear();
+
+                if (backup.data.activeProfileId) {
+                    localStorage.setItem('activeProfileId', backup.data.activeProfileId);
+                }
+
+                if (backup.data.profiles) {
+                    localStorage.setItem('runnerProfiles', backup.data.profiles);
+                }
+
+                Object.keys(backup.data.settings || {}).forEach(profileId => {
+                    localStorage.setItem(`runnerSettings_${profileId}`, backup.data.settings[profileId]);
+                });
+
+                Object.keys(backup.data.trades || {}).forEach(profileId => {
+                    localStorage.setItem(`runnerTrades_${profileId}`, backup.data.trades[profileId]);
+                });
+
+                this.showNotification(this.t('restore_backup_success'), 'success');
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+
+            } catch (error) {
+                console.error('Restore error:', error);
+                this.showNotification(this.t('restore_backup_error'), 'error');
+            }
+        };
+
+        reader.onerror = () => {
+            this.showNotification('❌ Dosya okunurken hata oluştu!', 'error');
+        };
+
+        reader.readAsText(file);
+    }
+
     renderRecentActivity() {
         const container = document.getElementById('recentActivityList');
         if (!container) return;
@@ -3110,6 +3275,30 @@ class TradingSystem {
         if (startNewChallengeBtn) {
             startNewChallengeBtn.addEventListener('click', () => {
                 this.startNewChallenge();
+            });
+        }
+
+        // Backup & Restore Listeners
+        const backupDataBtn = document.getElementById('backupDataBtn');
+        if (backupDataBtn) {
+            backupDataBtn.addEventListener('click', () => {
+                this.backupAllData();
+            });
+        }
+
+        const restoreDataBtn = document.getElementById('restoreDataBtn');
+        const restoreFileInput = document.getElementById('restoreFileInput');
+        if (restoreDataBtn && restoreFileInput) {
+            restoreDataBtn.addEventListener('click', () => {
+                restoreFileInput.click();
+            });
+
+            restoreFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.restoreAllData(file);
+                    e.target.value = ''; // Reset input
+                }
             });
         }
     }
@@ -4115,14 +4304,6 @@ document.addEventListener('DOMContentLoaded', () => {
         startJournalBtn.addEventListener('click', () => tradingSystem.closeWelcomeModal());
     }
 
-    // Close Account and Archive Button
-    const closeAccountBtn = document.getElementById('closeAccountBtn');
-    if (closeAccountBtn) {
-        closeAccountBtn.addEventListener('click', function () {
-            tradingSystem.handleCloseAccount();
-        });
-    }
-
     // Floating Action Button - Scroll to Trade Entry
     const fabButton = document.getElementById('fabAddTrade');
     if (fabButton) {
@@ -4169,9 +4350,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Backup & Restore Logic Removed
-
-    // ==========================================
     // BUG FIX: Result Segment Logic Check
     // ==========================================
     const resultButtons = document.querySelectorAll('#resultSegment .segmented-btn');

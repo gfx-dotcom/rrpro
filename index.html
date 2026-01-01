@@ -1069,22 +1069,82 @@
                             Kaydet</button>
                     </div>
 
-                    <!-- Backup Buttons Removed -->
+                    <!-- Backup & Restore Section -->
+                    <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <h4 style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span data-i18n="backup_restore_title">Yedekleme & Geri Yükleme</span>
+                        </h4>
+                        <p style="opacity: 0.7; font-size: 0.9rem; margin-bottom: 20px;"
+                            data-i18n="backup_restore_desc">
+                            Tüm trade verilerinizi, ayarlarınızı ve profillerinizi JSON dosyası olarak yedekleyip geri
+                            yükleyebilirsiniz.
+                        </p>
 
-                    <div class="form-actions" style="margin-top: 12px;">
-                        <button type="button" class="btn-secondary" id="resetSettings"
-                            data-i18n="reset">Varsayılan</button>
-                        <button type="button" class="btn-danger" id="clearAllData" data-i18n="reset_all_data">Her Şeyi
-                            Sil</button>
+                        <div class="form-actions" style="gap: 12px;">
+                            <!-- Backup Button -->
+                            <button type="button" class="btn-secondary" id="backupDataBtn"
+                                style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <span data-i18n="backup_download">Yedeği İndir (JSON)</span>
+                            </button>
+
+                            <!-- Restore Button -->
+                            <button type="button" class="btn-primary" id="restoreDataBtn"
+                                style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <polyline points="1 20 1 14 7 14"></polyline>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15">
+                                    </path>
+                                </svg>
+                                <span data-i18n="backup_restore">Yedeği Geri Yükle</span>
+                            </button>
+                        </div>
+
+                        <!-- Hidden file input -->
+                        <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
                     </div>
 
-                    <div style="margin-top: 20px; border-top: 1px solid var(--border-glass); padding-top: 20px;">
-                        <button type="button" class="btn-danger" id="closeAccountBtn"
-                            style="width: 100%; background: transparent; border: 1px solid rgba(255, 77, 77, 0.3); color: #ff4d4d;"
-                            data-i18n="close_account">
-                            Hesabı Kapat ve Arşivle
+                    <!-- Reset Buttons -->
+                    <div class="form-actions" style="margin-top: 12px;">
+                        <button type="button" class="btn-secondary" id="resetSettings" data-i18n="reset_settings">
+                            Varsayılan Ayarlar
+                        </button>
+                        <button type="button" class="btn-danger" id="clearAllData" data-i18n="reset_all_data">
+                            Tüm Verileri Sil
                         </button>
                     </div>
+
+                    <!-- Close Account & Archive -->
+                    <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <p style="opacity: 0.7; font-size: 0.9rem; margin-bottom: 16px; text-align: center;"
+                            data-i18n="close_account_desc">
+                            Hesabı sıfırlar ve journal'ı Excel/PDF olarak indirir.
+                        </p>
+                        <button type="button" class="btn-danger" id="closeAccountBtn"
+                            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                            </svg>
+                            <span data-i18n="close_account">Close Account & Archive</span>
+                        </button>
+                    </div>
+
                 </form>
             </div>
         </div>
