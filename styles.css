@@ -3613,3 +3613,42 @@ html body .feedback-card.success {
         background-position: -100% 0;
     }
 }
+
+
+
+
+/* ===================================
+   TRADE NOTES IN BREAKDOWN
+   =================================== */
+.breakdown-row.notes-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 12px;
+    margin-top: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.notes-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--neon-green);
+    opacity: 0.9;
+    flex-shrink: 0;
+}
+
+.notes-label svg {
+    opacity: 0.7;
+}
+
+.notes-content {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    word-wrap: break-word;
+    font-weight: 500;
+}

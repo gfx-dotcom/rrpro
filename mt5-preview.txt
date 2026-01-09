@@ -1,0 +1,200 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>1027871: Sergen manav manav - İşlem Geçmişi Raporu</title>
+    <meta name="generator" content="client terminal">
+    <style type="text/css">
+    <!--
+    @media screen {
+      td { font: 8pt  Tahoma,Arial; }
+      th { font: 10pt Tahoma,Arial; }
+    }
+    @media print {
+      td { font: 7pt Tahoma,Arial; }
+      th { font: 9pt Tahoma,Arial; }
+    }
+    .msdate { mso-number-format:"General Date"; }
+    .mspt   { mso-number-format:\#\,\#\#0\.00;  }
+    .hidden { display: none; }
+    body {margin:1px;}
+    //-->
+    </style>
+  </head>
+<body>
+<div align="center">
+    <table cellspacing="1" cellpadding="3" border="0">
+        <tr align="center">
+            <td colspan="14"><div style="font: 14pt Tahoma"><b>İşlem Geçmişi Raporu</b><br></div></td>
+        </tr>
+        <tr align="left">
+            <th colspan="4" nowrap align="right" style="width: 220px; height: 20px">İsim:</th>
+            <th colspan="10" nowrap align="left" style="width: 220px; height: 20px"><b>Sergen manav manav</b></th>
+        </tr>
+        <tr align="left">
+            <th colspan="4" nowrap align="right" style="width: 220px; height: 20px">Hesap:</th>
+            <th colspan="10" nowrap align="left" style="width: 220px; height: 20px"><b>1027871&nbsp;(USD,&nbsp;RLCrates-Live,&nbsp;demo,&nbsp;Hedge)</b></th>
+        </tr>
+        <tr align="left">
+            <th colspan="4" nowrap align="right" style="width: 220px; height: 20px">Şirket:</th>
+            <th colspan="10" nowrap align="left" style="width: 220px; height: 20px"><b>RL Crates, S.L.</b></th>
+        </tr>
+        <tr align="left">
+            <th colspan="4" nowrap align="right" style="width: 220px; height: 20px">Tarih:</th>
+            <th colspan="10" nowrap align="left" style="width: 220px; height: 20px"><b>2025.10.27 17:12</b></th>
+        </tr>
+        <tr>
+            <td nowrap style="width: 140px;height: 10px"></td>
+            <td nowrap style="width: 60px;"></td>
+            <td nowrap style="width: 60px;"></td>
+            <td nowrap style="width: 60px;"></td>
+            <td nowrap style="width: 70px;"></td>
+            <td nowrap style="width: 60px;"></td>
+            <td nowrap style="width: 60px;"></td>
+            <td nowrap style="width: 60px;"></td>
+            <td nowrap style="width: 140px;"></td>
+            <td nowrap style="width: 60px;"></td>
+            <td nowrap style="width: 60px;"></td>
+            <td nowrap style="width: 60px;"></td>
+            <td nowrap style="width: 60px;"></td>
+            <td nowrap style="width: 100px;"></td>
+        </tr>
+        <tr align="center">
+            <th colspan="14" style="height: 25px"><div style="font: 10pt Tahoma"><b>Pozisyonlar</b></div></th>
+        </tr>
+        <tr align="center" bgcolor="#E5F0FC">
+            <td nowrap style="height: 30px"><b>Zaman</b></td>
+            <td nowrap><b>Pozisyon</b></td>
+            <td nowrap><b>Sembol</b></td>
+            <td nowrap><b>Tür</b></td>
+            <td nowrap><b>Hacim</b></td>
+            <td nowrap><b>Fiyat</b></td>
+            <td nowrap><b>S / L</b></td>
+            <td nowrap><b>T / P</b></td>
+            <td nowrap><b>Zaman</b></td>
+            <td nowrap><b>Fiyat</b></td>
+            <td nowrap><b>Komisyon</b></td>
+            <td nowrap><b>Swap</b></td>
+            <td nowrap colspan="2"><b>Kar</b></td>
+        </tr>
+        
+        <tr bgcolor="#FFFFFF" align="right">
+            <td>2025.10.22 07:36:08</td>
+            <td>27479289</td>
+            <td>GER30.b</td>
+            <td>buy</td>
+            <td class="hidden" colspan="8"></td>
+            <td class="">2.5</td>
+            <td class="">24326.60</td>
+            <td class="">24276.55</td>
+            <td class=""></td>
+            <td class="">2025.10.22 08:05:56</td>
+            <td class="">24276.00</td>
+            <td class="">-6.07</td>
+            <td class="">0.00</td>
+            <td colspan="2">-146.83</td>
+        </tr>
+        
+        <tr bgcolor="#F7F7F7" align="right">
+            <td>2025.10.22 07:43:24</td>
+            <td>27479256</td>
+            <td>GER30.b</td>
+            <td>buy</td>
+            <td class="hidden" colspan="8"></td>
+            <td class="">2.5</td>
+            <td class="">24353.00</td>
+            <td class="">24262.41</td>
+            <td class=""></td>
+            <td class="">2025.10.22 08:21:41</td>
+            <td class="">24262.00</td>
+            <td class="">-6.07</td>
+            <td class="">0.00</td>
+            <td colspan="2">-264.03</td>
+        </tr>
+        
+        <tr bgcolor="#FFFFFF" align="right">
+            <td>2025.10.22 11:00:10</td>
+            <td>27481437</td>
+            <td>US100.b</td>
+            <td>buy</td>
+            <td class="hidden" colspan="8"></td>
+            <td class="">3.7</td>
+            <td class="">25112.55</td>
+            <td class="">25069.16</td>
+            <td class=""></td>
+            <td class="">2025.10.22 12:10:02</td>
+            <td class="">25067.65</td>
+            <td class="">-9.29</td>
+            <td class="">0.00</td>
+            <td colspan="2">-166.13</td>
+        </tr>
+        
+        <tr bgcolor="#F7F7F7" align="right">
+            <td>2025.10.22 11:00:58</td>
+            <td>27481464</td>
+            <td>GER30.b</td>
+            <td>buy</td>
+            <td class="hidden" colspan="8"></td>
+            <td class="">3.7</td>
+            <td class="">24282.90</td>
+            <td class="">24224.95</td>
+            <td class=""></td>
+            <td class="">2025.10.22 15:29:22</td>
+            <td class="">24224.50</td>
+            <td class="">-8.97</td>
+            <td class="">0.00</td>
+            <td colspan="2">-250.70</td>
+        </tr>
+        
+        <tr bgcolor="#FFFFFF" align="right">
+            <td>2025.10.22 13:11:01</td>
+            <td>27482884</td>
+            <td>GER30.b</td>
+            <td>buy</td>
+            <td class="hidden" colspan="8"></td>
+            <td class="">4</td>
+            <td class="">24297.90</td>
+            <td class="">24274.77</td>
+            <td class=""></td>
+            <td class="">2025.10.22 14:14:35</td>
+            <td class="">24274.60</td>
+            <td class="">-9.71</td>
+            <td class="">0.00</td>
+            <td colspan="2">-107.98</td>
+        </tr>
+        
+        <tr bgcolor="#F7F7F7" align="right">
+            <td>2025.10.22 13:54:26</td>
+            <td>27483306</td>
+            <td>GER30.b</td>
+            <td>buy</td>
+            <td class="hidden" colspan="8"></td>
+            <td class="">4</td>
+            <td class="">24303.90</td>
+            <td class="">24279.40</td>
+            <td class=""></td>
+            <td class="">2025.10.22 14:05:11</td>
+            <td class="">24278.60</td>
+            <td class="">-9.72</td>
+            <td class="">0.00</td>
+            <td colspan="2">-117.26</td>
+        </tr>
+        
+        <tr bgcolor="#FFFFFF" align="right">
+            <td>2025.10.22 15:04:04</td>
+            <td>27484607</td>
+            <td>GER30.b</td>
+            <td>buy</td>
+            <td class="hidden" colspan="8"></td>
+            <td class="">3.7</td>
+            <td class="">24271.40</td>
+            <td class="">24232.22</td>
+            <td class=""></td>
+            <td class="">2025.10.22 15:12:04</td>
+            <td class="">24231.50</td>
+            <td class="">-8.97</td>
+            <td class="">0.00</td>
+            <td colspan="2">-171.15</td>
+        </tr>
+        
+        <tr bgcolor="#F7F7F7" align="right">
+            <td>2025.10.22 19:08:37</td>
